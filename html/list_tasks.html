@@ -6,15 +6,17 @@
     <title>SQL Практика</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
-            color: #333;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            padding-top: 0;
-            background-color: #f5f5f5;
+            background-color: #f5f7fa;
+            color: #2c3e50;
         }
         
         h1, h2, h3 {
@@ -309,6 +311,7 @@
                 <span>SQL Practice</span>
             </a>
             <nav class="nav-menu">
+                
                 <a href="main.php" class="nav_element">Песочница</a>
                 <a href="guid.html" class="nav_element">Справочник</a>
                 <div class="dropdown">
@@ -326,97 +329,6 @@
         </div>
     </header>
 
-<<<<<<< HEAD:html/list_tasks.php
-    <h2 id="easy">Основные запросы</h2>
-    <div class="task-container">
-        <div class="task-card">
-            <span class="difficulty easy">Легко</span>
-            <h3>Выбор всех данных из таблицы</h3>
-            <p>Напишите SQL запрос для выбора всех записей из таблицы "employees".</p>
-            
-            <button class="show-solution" onclick="toggleSolution('solution1')">Перейти к решению</button>
-            <div id="solution1" class="solution">
-                <p>Решение:</p>
-                <div class="sql-code">SELECT * FROM employees;</div>
-            </div>
-        </div>
-        
-        <div class="task-card">
-            <span class="А>Легко</span>
-            <h3>Выбор конкретных столбцов</h3>
-            <p>Напишите SQL запрос для выбора только имен и зарплат сотрудников из таблицы "employees".</p>
-            
-            <button class="show-solution" onclick="toggleSolution('solution2')">Показать решение</button>
-            <div id="solution2" class="solution">
-                <p>Решение:</p>
-                <div class="sql-code">SELECT first_name, last_name, salary 
-FROM employees;</div>
-            </div>
-        </div>
-    </div>
-    
-    <h2 id="mudium">Соединения таблиц</h2>
-    <div class="task-container">
-        <div class="task-card">
-            <span class="difficulty medium">Средне</span>
-            <h3>INNER JOIN двух таблиц</h3>
-            <p>Напишите SQL запрос, который соединяет таблицы "employees" и "departments" по полю department_id и выводит имя сотрудника и название отдела.</p>
-            
-            <button class="show-solution" onclick="toggleSolution('solution3')">Показать решение</button>
-            <div id="solution3" class="solution">
-                <p>Решение:</p>
-                <div class="sql-code">SELECT e.first_name, e.last_name, d.department_name
-FROM employees e
-INNER JOIN departments d ON e.department_id = d.department_id;</div>
-            </div>
-        </div>
-        
-        <div class="task-card">
-            <span class="difficulty hard">Сложно</span>
-            <h3>LEFT JOIN с агрегацией</h3>
-            <p>Напишите SQL запрос, который выводит название отдела и количество сотрудников в каждом отделе, включая отделы без сотрудников.</p>
-            
-            <button class="show-solution" onclick="toggleSolution('solution4')">Показать решение</button>
-            <div id="solution4" class="solution">
-                <p>Решение:</p>
-                <div class="sql-code">SELECT d.department_name, COUNT(e.employee_id) AS employee_count
-FROM departments d
-LEFT JOIN employees e ON d.department_id = e.department_id
-GROUP BY d.department_name
-ORDER BY employee_count DESC;</div>
-            </div>
-        </div>
-    </div>
-    
-    <h2 id="subqueries">Подзапросы</h2>
-    <div class="task-container">
-        <div class="task-card">
-            <span class="difficulty medium">Средне</span>
-            <h3>Подзапрос в WHERE</h3>
-            <p>Напишите SQL запрос для вывода сотрудников, чья зарплата выше средней по компании.</p>
-            
-            <button class="show-solution" onclick="toggleSolution('solution5')">Показать решение</button>
-            <div id="solution5" class="solution">
-                <p>Решение:</p>
-                <div class="sql-code">SELECT first_name, last_name, salary
-FROM employees
-WHERE salary > (SELECT AVG(salary) FROM employees);</div>
-            </div>
-        </div>
-=======
-    <div class="filter-group">
-        <label>Тема:</label>
-        <select id="topicFilter">
-            <option value="all">Все темы</option>
-            <option value="basics">Основы</option>
-            <option value="joins">Соединения</option>
-            <option value="subqueries">Подзапросы</option>
-            <option value="functions">Функции</option>
-            <option value="advanced">Продвинутые</option>
-        </select>
->>>>>>> 840b1fc4af2f24d5fc84deb2eecab962f31d1e49:html/list_tasks.html
-    </div>
-
     <h2 id="easy">Легкие задачи</h2>
     <div id="Easy-container" class="task-container"></div>
 
@@ -429,7 +341,7 @@ WHERE salary > (SELECT AVG(salary) FROM employees);</div>
     <script>
         async function loadTasks(category) {
             try {
-                const response = await fetch(`http://localhost:8000/getTasksByLevel/${category}`);
+                const response = await fetch(`http://192.168.1.8:8000/getTasksByLevel/${category}`);
                 if (!response.ok) throw new Error('Ошибка загрузки задач');
                 const tasks = await response.json();
                 console.log(tasks)
@@ -465,21 +377,6 @@ WHERE salary > (SELECT AVG(salary) FROM employees);</div>
                 container.innerHTML = `<p class="error">Ошибка загрузки задач: ${error.message}</p>`;
             }
         }
-
-        // Фильтрация задач
-        document.getElementById('topicFilter').addEventListener('change', (e) => {
-            const category = e.target.value;
-            if (category === 'all') {
-                document.querySelectorAll('.task-container').forEach(container => {
-                    container.style.display = 'flex';
-                });
-            } else {
-                document.querySelectorAll('.task-container').forEach(container => {
-                    container.style.display = 'none';
-                });
-                document.getElementById(`${category}-container`).style.display = 'flex';
-            }
-        });
 
         // Загрузка задач при старте
         document.addEventListener('DOMContentLoaded', () => {

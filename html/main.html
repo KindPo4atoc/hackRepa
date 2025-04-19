@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="../css/main.css">
     <style>
-                .dropdown {
+        .dropdown {
             position: relative;
             display: inline-block;
         }
@@ -124,6 +124,16 @@
             border-radius: 4px;
             transition: background-color 0.3s;
         }   
+        .result{
+            margin: 3px;
+            border-radius: 4px;
+            border: 2px solid #333;
+        }
+        .result p{
+            margin: 3px;
+            color: #0a0a0a;
+            font-style: Helvetica, sans-serif;
+        }
 
     </style>
 </head>
@@ -152,9 +162,6 @@
         </div>
     </header>
     <div class="container">
-        <div class="header">
-            
-        </div>
 
         <div class="tabs">
             <div class="tab active" data-tab="query">Задача</div>
@@ -162,8 +169,7 @@
         </div>
 
         <div id="query-tab" class="tab-content active">
-            <div class="query-area">
-                <p></p>
+            <div id="tt" class="query-area">
                 <div class="button-group">
                     <button id="execute-btn">Выполнить запрос</button>
                     <button id="clear-btn" class="secondary">Очистить</button>
@@ -189,12 +195,20 @@
             let idTask = localStorage.getItem('id')
             let task;
             var infoTables;
-            fetch(`http://localhost:8000/getTask/${idTask}`)
+            fetch(`http://192.168.1.8:8000/getTask/${idTask}`)
             .then(response => response.json())
-            .then(data => {
+            .then(data => { 
+                console.log(data);
+                const container = document.getElementById('tt');
+                const card = document.createElement('div');
+                card.className = 'result';
+                card.innerHTML = `
+                    <p>${data.description}</p>
+                `;
+                container.insertBefore(card, container.firstChild);
                 task = data
                 console.log(task)
-                fetch('http://localhost:8000/createDB', {
+                fetch('http://192.168.1.8:8000/createDB', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -203,8 +217,7 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    infoTables = data.tables
-                    
+                    infoTables = data.tables;  
                 })
                 .catch(error => {
                     showError('Request failed: ' + error.message);
@@ -247,17 +260,6 @@
                 resultArea.innerHTML = '';
             });
             
-            // Format SQL
-            formatBtn.addEventListener('click', function() {
-                if (sqlQuery.value.trim()) {
-                    try {
-                        sqlQuery.value = formatSql(sqlQuery.value);
-                    } catch (e) {
-                        showError('Error formatting SQL: ' + e.message);
-                    }
-                }
-            });
-            
             // Handle Enter key with Ctrl
             sqlQuery.addEventListener('keydown', function(e) {
                 if (e.key === 'Enter' && e.ctrlKey) {
@@ -277,17 +279,17 @@
             const resultArea = document.getElementById('result-area');
             resultArea.innerHTML = '<div>Executing query...</div>';
             
-            fetch('http://localhost:5000/api/execute-query', {
+            fetch('http://192.168.1.8:8000/executeCommand', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ query: query })
+                body: JSON.stringify({ 'command': query })
             })
             .then(response => response.json())
             .then(data => {
-                if (data.status === 'error') {
-                    showError(data.message);
+                if (data.status === 'Wrong answer') {
+                    showError(data.status);
                 } else {
                     if (data.data) {
                         // Display results in a table for SELECT queries
@@ -360,11 +362,12 @@
             let offsetX = 0;
             let offsetY = 0;
             
-            fetch('http://localhost:5000/api/schema')
+            fetch('http://192.168.1.8:8000/getInfoTable')
                 .then(response => response.json())
                 .then(data => {
+                    console.log(data)
                     tables = data.tables;
-                    relationships = data.relationships;
+                    //relationships = data.relationships;
                     container.innerHTML = '';
                     createTableCards();
                     setupDragAndDrop();
@@ -393,25 +396,31 @@
                 let angle = 0;
                 
                 const cards = [];
-                for (const [tableName, columns] of Object.entries(tables)) {
+                for (const table of Object.entries(tables)) {
                     const tableCard = document.createElement('div');
                     tableCard.className = 'table-card';
-                    tableCard.id = `table-${tableName}`;
+                    tableCard.id = `table-${table['1'].name}`;
                     
-                    let tableHTML = `<div class="table-name">${tableName}</div>`;
+                    let tableHTML = `<div class="table-name">${table['1'].name}</div>`;
                     
-                    columns.forEach(column => {
+                    console.log(table['1']);
+                
+                    for(let i = 0; i < table['1'].columns.length; i++)
+                    {
                         let badges = '';
-                        if (column.is_pk) badges += '<span class="pk-badge">PK</span>';
-                        if (column.is_fk) badges += '<span class="fk-badge">FK</span>';
-                        
+                        if (table['1'].types[i][0]==='PK') badges += '<span class="pk-badge">PK</span>';
+                        if (table['1'].types[i][0]==='FK') badges += '<span class="fk-badge">FK</span>';
                         tableHTML += `
                             <div class="column-row">
-                                <div class="column-name">${column.name}${badges}</div>
-                                <div class="column-type">${column.type}</div>
-                            </div>
+                                <div class="column-name">${table['1'].columns[i]}${badges}</div>
                         `;
-                    });
+                        if (table['1'].types[i][0]!=='PK' && table['1'].types[i][0]!=='FK') tableHTML += `<div class="column-type">${table['1'].types[i][0]}</div>`;
+                        else
+                        tableHTML += `
+                                <div class="column-type">${table['1'].types[i][1]}</div>
+                            </div>
+                        `; 
+                    }
                     
                     tableCard.innerHTML = tableHTML;
                     container.appendChild(tableCard);

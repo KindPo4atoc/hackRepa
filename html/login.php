@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-if (isset($_SESSION['user_id'])) {
+if (isset($_COOKIE['login'])) {
     header("Location: list_tasks.html");
     exit;
 }
@@ -68,10 +68,11 @@ if (isset($_SESSION['user_id'])) {
                 body: JSON.stringify(formData)
             })
             .then(response => response.json())
-            .then(data => {
+            .then(data => { 
                 if (data.status != '200 OK') {
                     alert(data.error);
                 } else {
+                    document.cookie = 'login=' + formData.login;
                     window.location.href = 'list_tasks.html';
                 }
             })

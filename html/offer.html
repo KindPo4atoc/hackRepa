@@ -314,79 +314,8 @@
         </div>
     </header>
 
-    
-    <div class="task-container">
-        <div class="task-card">
-            <h4>От пользователя:</h4>
-            <h3>Выбор всех данных из таблицы</h3>
-            <p>Напишите SQL запрос для выбора всех записей из таблицы "employees".</p>
-            
-            <button class="show-solution" onclick="toggleSolution('solution1')">Узнать больше</button>
-            <div id="solution1" class="solution">
-                <p>Информация:</p>
-                <div class="sql-code">🚩Здесь будет краткое описание🚩</div>
-                <button class="DownloadBtn">Скачать данные</button>
-                <button class="AcceptBtn">✔️ Принять</button>
-                <button class="CancelBtn">❌ Отклонить</button>
-                <input placeholder="Введите сложность" type="text">
-            </div>
-        </div>
+    <div id="tasks">
         
-    </div>
-    <div class="task-container">
-        <div class="task-card">
-            <h4>От пользователя:</h4>
-            <h3>Выбор конкретных столбцов</h3>
-            <p>Напишите SQL запрос для выбора только имен и зарплат сотрудников из таблицы "employees".</p>
-            
-            <button class="show-solution" onclick="toggleSolution('solution2')">Узнать больше</button>
-            <div id="solution2" class="solution">
-                <p>Информация:</p>
-                <div class="sql-code">🚩Здесь будет краткое описание🚩</div>
-                <button class="DownloadBtn">Скачать данные</button>
-                <button class="AcceptBtn">✔️ Принять</button>
-                <button class="CancelBtn">❌ Отклонить</button>
-                <input placeholder="Введите сложность" type="text">
-            </div>
-        </div>
-    </div>
-    
-    
-    
-    <div class="task-container">
-        <div class="task-card">
-            <h4>От пользователя:</h4>
-            <h3>INNER JOIN двух таблиц</h3>
-            <p>Напишите SQL запрос, который соединяет таблицы "employees" и "departments" по полю department_id и выводит имя сотрудника и название отдела.</p>
-            
-            <button class="show-solution" onclick="toggleSolution('solution3')">Узнать больше</button>
-            <div id="solution3" class="solution">
-                <p>Информация:</p>
-                <div class="sql-code">🚩Здесь будет краткое описание🚩</div>
-                <button class="DownloadBtn">Скачать данные</button>
-                <button class="AcceptBtn">✔️ Принять</button>
-                <button class="CancelBtn">❌ Отклонить</button>
-                <input placeholder="Введите сложность" type="text">
-            </div>
-        </div>
-        
-    </div>
-    <div class="task-container">
-        <div class="task-card">
-            <h4>От пользователя:</h4>
-            <h3>LEFT JOIN с агрегацией</h3>
-            <p>Напишите SQL запрос, который выводит название отдела и количество сотрудников в каждом отделе, включая отделы без сотрудников.</p>
-            
-            <button class="show-solution" onclick="toggleSolution('solution4')">Узнать больше</button>
-            <div id="solution4" class="solution">
-                <p>Информация:</p>
-                <div class="sql-code">🚩Здесь будет краткое описание🚩</div>
-                <button class="DownloadBtn">Скачать данные</button>
-                <button class="AcceptBtn">✔️ Принять</button>
-                <button class="CancelBtn">❌ Отклонить</button>
-                <input placeholder="Введите сложность" type="text">
-            </div>
-        </div>
     </div>
    
 
@@ -417,6 +346,50 @@
     </footer>
 
     <script>
+
+        async function loadTasks() {
+            try {
+                const response = await fetch(`http://192.168.1.8:8000/getTasksToCheck`);
+                if (!response.ok) throw new Error('Ошибка загрузки задач');
+                const tasks = await response.json();
+                console.log(tasks)
+                const container = document.getElementById(`tasks`);
+                container.innerHTML = '';
+                
+                tasks.tasks.forEach(task => {
+                    const container_task = document.createElement('div');
+                    container_task.className = 'task-container';
+                    const card = document.createElement('div');
+                    card.className = 'task-card';
+                    card.innerHTML = `
+                        <h4>От пользователя: ${task.author}</h4>
+                        <h3>${task.header}</h3>
+                        
+                        <button class="show-solution" onclick="toggleSolution('solution4')">Узнать больше</button>
+                        <div id="solution4" class="solution">
+                            <p>Информация:</p>
+                            <div class="sql-code">${task.description}</div>
+                            <button class="DownloadBtn">Скачать данные</button>
+                            <button class="AcceptBtn">✔️ Принять</button>
+                            <button class="CancelBtn">❌ Отклонить</button>
+                            <input placeholder="Введите сложность" type="text">
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+
+            } catch (error) {
+                console.error('Ошибка:', error);
+                const container = document.getElementById(`${category}-container`);
+                container.innerHTML = `<p class="error">Ошибка загрузки задач: ${error.message}</p>`;
+            }
+        }
+
+        // Загрузка задач при старте
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTasks();
+        });
+
         function toggleSolution(id) {
             const solution = document.getElementById(id);
             const button = solution.previousElementSibling;
