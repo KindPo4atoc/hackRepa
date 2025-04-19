@@ -232,12 +232,13 @@
                             Решить
                         </button>
                     `;
-                    container.appendChild(card);
+                    container.appendChild(card);    
                 });
 
                 // Добавляем обработчики для кнопок
                 container.querySelectorAll('.show-solution').forEach(btn => {
                     btn.addEventListener('click', function() {
+                        var btnId = $btn.attr('id')
                         const solutionDiv = this.nextElementSibling;
                         solutionDiv.style.display = solutionDiv.style.display === 'block' ? 'none' : 'block';
                         this.textContent = solutionDiv.style.display === 'block' 

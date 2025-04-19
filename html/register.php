@@ -1,98 +1,3 @@
-<?php
-session_start();
-
-// Если пользователь уже авторизован, перенаправляем
-if (isset($_SESSION['user_id'])) {
-    header("Location: login.php");
-    exit;
-}
-
-$errors = [];
-$success = false;
-$username = '';
-$email = '';
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim($_POST['username'] ?? '');
-    $email = trim($_POST['email'] ?? '');
-    $password = trim($_POST['password'] ?? '');
-    $confirm_password = trim($_POST['confirm_password'] ?? '');
-
-    // Валидация данных
-    if (empty($username)) {
-        $errors['username'] = 'Имя пользователя обязательно';
-    } elseif (strlen($username) < 4) {
-        $errors['username'] = 'Не менее 4 символов';
-    }
-
-    if (empty($email)) {
-        $errors['email'] = 'Email обязателен';
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $errors['email'] = 'Некорректный email';
-    }
-
-    if (empty($password)) {
-        $errors['password'] = 'Пароль обязателен';
-    } elseif (strlen($password) < 6) {
-        $errors['password'] = 'Не менее 6 символов';
-    }
-
-    if ($password !== $confirm_password) {
-        $errors['confirm_password'] = 'Пароли не совпадают';
-    }
-
-    // Если нет ошибок - отправка на API
-    if (empty($errors)) {
-        $api_url = 'http://localhost:5000/api/register';
-        $data = [
-            'username' => $username,
-            'email' => $email,
-            'password' => $password
-        ];
-
-        
-        $url = 'http://example.com/api';
-$options = [
-    'http' => [
-        'method' => 'GET', 
-        'header' => "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)\r\n"
-    ]
-];
-
-$context = stream_context_create($options);
-$response = file_get_contents($url, false, $context);
-
-if ($response === false) {
-    die("Ошибка запроса: " . print_r(error_get_last(), true));
-}
-
-echo $response;
-
-
-        $response = curl_exec($ch);
-        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $curl_error = curl_error($ch);
-        curl_close($ch);
-
-        // Обработка ответа
-        if ($response === false) {
-            $errors['general'] = 'Ошибка подключения к API: ' . $curl_error;
-        } else {
-            $result = json_decode($response, true);
-            
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                $errors['general'] = 'Неверный формат ответа от сервера';
-            } elseif ($http_code === 201 && isset($result['message'])) {
-                $_SESSION['registration_success'] = $result['message'];
-                header("Location: login.php");
-                exit;
-            } else {
-                $errors['general'] = $result['error'] ?? 'Ошибка регистрации';
-            }
-        }
-    }
-}
-?>
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -167,26 +72,26 @@ echo $response;
 
     <script>
         const express = require('express');
-const cors = require('cors'); 
+        const cors = require('cors'); 
 
-const app = express();
-
-
-app.use(cors());
+        const app = express();
 
 
-app.use(cors({
-  origin: 'http://localhost:3000',
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+        app.use(cors());
 
 
-app.post('/api/register', (req, res) => {
-  res.json({ success: true });
-});
+        app.use(cors({
+        origin: 'http://localhost:3000',
+        methods: ['GET', 'POST', 'PUT', 'DELETE'],
+        allowedHeaders: ['Content-Type', 'Authorization']
+        }));
 
-app.listen(5000, () => console.log('Server running on port 5000'));
+
+        app.post('/api/register', (req, res) => {
+        res.json({ success: true });
+        });
+
+        app.listen(5000, () => console.log('Server running on port 5000'));
 
         document.getElementById('registerForm').addEventListener('submit', async function(e) {
             e.preventDefault();

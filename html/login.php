@@ -3,61 +3,8 @@ session_start();
 
 // Редирект если уже авторизован
 if (isset($_SESSION['user_id'])) {
-    header("Location: dashboard.php");
+    header("Location: list_tasks.php");
     exit;
-}
-
-$error = '';
-$username = '';
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim($_POST['username'] ?? '');
-    $password = trim($_POST['password'] ?? '');
-
-    // Валидация
-    if (empty($username) || empty($password)) {
-        $error = 'Заполните все поля';
-    } else {
-        $api_url = 'http://localhost:5000/api/login';
-        $data = [
-            'username' => $username,
-            'password' => $password
-        ];
-
-        $options = [
-            'http' => [
-                'header' => "Content-Type: application/json\r\n",
-                'method' => 'POST',
-                'content' => json_encode($data),
-                'timeout' => 10
-            ]
-        ];
-
-        try {
-            $context = stream_context_create($options);
-            $result = file_get_contents($api_url, false, $context);
-            
-            if ($result === FALSE) {
-                throw new Exception("Ошибка подключения к API");
-            }
-
-            $response = json_decode($result, true);
-            
-            if (isset($response['error'])) {
-                $error = $response['error'];
-            } else {
-                // Успешная авторизация
-                $_SESSION['user_id'] = $response['user']['id'];
-                $_SESSION['username'] = $response['user']['username'];
-                $_SESSION['token'] = $response['token'];
-                
-                header("Location: dashboard.php");
-                exit;
-            }
-        } catch (Exception $e) {
-            $error = 'Ошибка сервера: ' . $e->getMessage();
-        }
-    }
 }
 ?>
 <!DOCTYPE html>

@@ -341,7 +341,7 @@
         </div>
         
         <div class="task-card">
-            <span class="difficulty easy">Легко</span>
+            <span class="А>Легко</span>
             <h3>Выбор конкретных столбцов</h3>
             <p>Напишите SQL запрос для выбора только имен и зарплат сотрудников из таблицы "employees".</p>
             
