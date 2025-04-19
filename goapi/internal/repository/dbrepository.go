@@ -99,3 +99,99 @@ func (r *DBRepository) DestroyDBTask(dbName string) (entity.Answer, error) {
 	}
 
 }
+func (r *DBRepository) GetAllTasks() (entity.ContextTask, error) {
+	var tasks entity.ContextTask
+	rows, err := r.store.db.Query(
+		"select id_task, heading, description, s.login, task_level " +
+			"from tasks as t left join users as s on t.fk_user = s.id where t.status = 1;",
+	)
+	if err != nil {
+		return entity.ContextTask{}, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var dataRow entity.Task
+		err := rows.Scan(
+			&dataRow.IdTask,
+			&dataRow.Header,
+			&dataRow.DescriptionTask,
+			&dataRow.LoginAuthor,
+			&dataRow.LevelTask,
+		)
+		if err != nil {
+			return entity.ContextTask{}, err
+		}
+		tasks.Data = append(tasks.Data, dataRow)
+	}
+	if len(tasks.Data) > 0 {
+		return tasks, nil
+	} else {
+		return entity.ContextTask{}, nil
+	}
+}
+func (r *DBRepository) GetTask(idTask string) (entity.Task, error) {
+	var task entity.Task
+	rows, err := r.store.db.Query(
+		"select id_task, heading, description, s.login, task_level "+
+			"from tasks as t left join users as s on t.fk_user = s.id where t.status = 1 and t.id_task = $1;",
+		idTask,
+	)
+	if err != nil {
+		return entity.Task{}, err
+	}
+
+	defer rows.Close()
+	i := 0
+	for rows.Next() {
+		err := rows.Scan(
+			&task.IdTask,
+			&task.Header,
+			&task.DescriptionTask,
+			&task.LoginAuthor,
+			&task.LevelTask,
+		)
+		if err != nil {
+			return entity.Task{}, err
+		}
+		i++
+	}
+	if i > 0 {
+		return task, nil
+	} else {
+		return entity.Task{}, nil
+	}
+}
+func (r *DBRepository) GetTasksByLevel(level string) (entity.ContextTask, error) {
+	var tasks entity.ContextTask
+	rows, err := r.store.db.Query(
+		"select id_task, heading, description, s.login, task_level "+
+			"from tasks as t left join users as s on t.fk_user = s.id where t.status = 1 and t.task_level = $1;",
+		level,
+	)
+	if err != nil {
+		return entity.ContextTask{}, err
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		var dataRow entity.Task
+		err := rows.Scan(
+			&dataRow.IdTask,
+			&dataRow.Header,
+			&dataRow.DescriptionTask,
+			&dataRow.LoginAuthor,
+			&dataRow.LevelTask,
+		)
+		if err != nil {
+			return entity.ContextTask{}, err
+		}
+		tasks.Data = append(tasks.Data, dataRow)
+	}
+	if len(tasks.Data) > 0 {
+		return tasks, nil
+	} else {
+		return entity.ContextTask{}, nil
+	}
+}

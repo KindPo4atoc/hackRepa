@@ -1,9 +1,8 @@
 <?php
 session_start();
 
-// Редирект если уже авторизован
 if (isset($_SESSION['user_id'])) {
-    header("Location: list_tasks.php");
+    header("Location: list_tasks.html");
     exit;
 }
 ?>
@@ -15,8 +14,8 @@ if (isset($_SESSION['user_id'])) {
     <title>Вход в систему</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="login.css">
-    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="../css/login.css">
+    <link rel="stylesheet" href="../css/lr.css">
 </head>
 <body>
     <div class="login-container">
@@ -28,9 +27,9 @@ if (isset($_SESSION['user_id'])) {
         
         <form action="login.php" method="POST">
             <div class="form-group">
-                <label for="username">Логин</label>  <!-- Изменили с Email на Логин -->
+                <label for="username">Логин</label>
                 <div class="input-with-icon">
-                    <i class="fas fa-user"></i>  <!-- Изменили иконку -->
+                    <i class="fas fa-user"></i>
                     <input type="text" id="username" name="username" value="<?php echo htmlspecialchars($username); ?>" required>
                 </div>
             </div>
@@ -48,7 +47,6 @@ if (isset($_SESSION['user_id'])) {
         
         <div class="links">
             <a href="register.php">Регистрация</a>
-            <a href="forgot_password.php">Забыли пароль?</a>
         </div>
     </div>
 
@@ -58,11 +56,11 @@ if (isset($_SESSION['user_id'])) {
             e.preventDefault();
             
             const formData = {
-                username: document.getElementById('username').value,
-                password: document.getElementById('password').value
+                login: document.getElementById('username').value,
+                pass_hash: document.getElementById('password').value
             };
             
-            fetch('http://localhost:5000/api/login', {
+            fetch('http://192.168.1.8:8000/validateUser', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -71,16 +69,15 @@ if (isset($_SESSION['user_id'])) {
             })
             .then(response => response.json())
             .then(data => {
-                if (data.error) {
+                if (data.status != '200 OK') {
                     alert(data.error);
                 } else {
-                    // Перенаправляем на защищенную страницу
-                    window.location.href = 'dashboard.php';
+                    window.location.href = 'list_tasks.html';
                 }
             })
             .catch((error) => {
                 console.error('Error:', error);
-                alert('Произошла ошибка при входе');
+                alert('Сревер временно недоступен');
             });
         });
     </script>

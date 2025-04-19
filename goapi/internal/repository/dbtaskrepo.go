@@ -15,6 +15,7 @@ import (
 type DBTaskRepository struct {
 	store          *DataBaseTask
 	answerTaskPath string
+	dbName         string
 }
 
 func (r *DBTaskRepository) ExecuteCommand(cmd string) (entity.Answer, error) {
@@ -25,7 +26,7 @@ func (r *DBTaskRepository) ExecuteCommand(cmd string) (entity.Answer, error) {
 	if err != nil {
 		return entity.Answer{Status: "Not read answer file"}, err
 	}
-	answer := strings.Split(string(content), ",")
+	cmdForAnswer := string(content)
 	fmt.Println(cmd)
 	var count int
 	rows, err := r.store.db.Query(cmd)
@@ -39,7 +40,7 @@ func (r *DBTaskRepository) ExecuteCommand(cmd string) (entity.Answer, error) {
 	if err != nil {
 		return entity.Answer{Status: "Ошибка при чтении колонок"}, err
 	}
-
+	var dataQuery []string
 	values := make([]interface{}, len(columns))
 	pointers := make([]interface{}, len(columns))
 	for i := range values {
@@ -50,15 +51,44 @@ func (r *DBTaskRepository) ExecuteCommand(cmd string) (entity.Answer, error) {
 		if err != nil {
 			return entity.Answer{}, err
 		}
-		dbValue := fmt.Sprintf("%v", values[0])
-		for i := 0; i < len(answer); i++ {
-			if dbValue == answer[i] {
+		dbVal := fmt.Sprintf("%v", values)
+		dataQuery = append(dataQuery, dbVal)
+	}
+	fmt.Println(dataQuery)
+	rowsAnswer, err := r.store.db.Query(cmdForAnswer)
+	if err != nil {
+		return entity.Answer{}, err
+	}
+
+	defer rowsAnswer.Close()
+	columns, err = rowsAnswer.Columns()
+	if err != nil {
+		return entity.Answer{Status: "Ошибка при чтении колонок"}, err
+	}
+	var dataAnswer []string
+	valuesAnswer := make([]interface{}, len(columns))
+	pointersAnswer := make([]interface{}, len(columns))
+	for i := range valuesAnswer {
+		pointersAnswer[i] = &valuesAnswer[i]
+	}
+	for rowsAnswer.Next() {
+		err := rowsAnswer.Scan(pointersAnswer...)
+		if err != nil {
+			return entity.Answer{}, err
+		}
+		dbValAnswer := fmt.Sprintf("%v", valuesAnswer)
+		dataAnswer = append(dataAnswer, dbValAnswer)
+	}
+	fmt.Println(dataAnswer)
+	for i := 0; i < len(dataAnswer); i++ {
+		tmp := dataAnswer[i]
+		for j := 0; j < len(dataQuery); j++ {
+			if tmp == dataQuery[j] {
 				count++
 			}
 		}
 	}
-	fmt.Printf("len(answer) - %d\ncount - %d", len(answer), count)
-	if count == len(answer) {
+	if count == len(dataAnswer) && len(dataAnswer) == len(dataQuery) {
 		return entity.Answer{Status: "200 OK"}, err
 	} else {
 		return entity.Answer{Status: "Wrong answer"}, nil
@@ -67,7 +97,7 @@ func (r *DBTaskRepository) ExecuteCommand(cmd string) (entity.Answer, error) {
 func (r *DBTaskRepository) CreateDBForTask(taskNumber int) (entity.ContextTables, error) {
 	pathToTables := "./internal/databases"
 	var infoTables entity.ContextTables
-	dbName := "task"
+	dbName := "task" + strconv.Itoa(taskNumber)
 	var pathFiles []string
 	entries, err := os.ReadDir(pathToTables)
 	if err != nil {
@@ -77,7 +107,6 @@ func (r *DBTaskRepository) CreateDBForTask(taskNumber int) (entity.ContextTables
 	for _, entry := range entries {
 		tmp := strings.Split(entry.Name(), ".")
 		if tmp[0] == strconv.Itoa(taskNumber) {
-			dbName = dbName + tmp[0]
 			pathToTables = pathToTables + "/" + entry.Name()
 		}
 	}
@@ -90,6 +119,7 @@ func (r *DBTaskRepository) CreateDBForTask(taskNumber int) (entity.ContextTables
 		pathFiles = append(pathFiles, tmp)
 	}
 	fmt.Println("ok")
+	r.dbName = dbName
 	_, err = r.store.db.Exec("CREATE DATABASE " + dbName)
 	if err != nil {
 		r.store.Close()
@@ -172,6 +202,9 @@ func GetPathCsv(currDir, pathToCsv string) string {
 		}
 	}
 	return result
+}
+func (r *DBTaskRepository) GetDbName() string {
+	return r.dbName
 }
 func CheckType(data string) string {
 	reInteger := regexp.MustCompile(`^[+-]?(0|[1-9]\d*)$`)

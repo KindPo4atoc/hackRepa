@@ -6,8 +6,8 @@
     <title>Регистрация</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="register.css">
-    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="../css/register.css">
+    <link rel="stylesheet" href="../css/lr.css">
 </head>
 <body>
     <div class="register-container">
@@ -26,17 +26,6 @@
                 </div>
                 <?php if (!empty($errors['username'])): ?>
                     <span class="field-error"><?php echo htmlspecialchars($errors['username']); ?></span>
-                <?php endif; ?>
-            </div>
-            
-            <div class="form-group">
-                <label for="email">Email</label>
-                <div class="input-with-icon">
-                    <i class="fas fa-envelope"></i>
-                    <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($email); ?>" required>
-                </div>
-                <?php if (!empty($errors['email'])): ?>
-                    <span class="field-error"><?php echo htmlspecialchars($errors['email']); ?></span>
                 <?php endif; ?>
             </div>
             
@@ -71,65 +60,38 @@
     </div>
 
     <script>
-        const express = require('express');
-        const cors = require('cors'); 
-
-        const app = express();
-
-
-        app.use(cors());
-
-
-        app.use(cors({
-        origin: 'http://localhost:3000',
-        methods: ['GET', 'POST', 'PUT', 'DELETE'],
-        allowedHeaders: ['Content-Type', 'Authorization']
-        }));
-
-
-        app.post('/api/register', (req, res) => {
-        res.json({ success: true });
-        });
-
-        app.listen(5000, () => console.log('Server running on port 5000'));
-
-        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+        document.querySelector('form').addEventListener('submit', function(e) {
             e.preventDefault();
-            
-            const formData = {
-                username: document.getElementById('username').value,
-                email: document.getElementById('email').value,
-                password: document.getElementById('password').value,
-                confirm_password: document.getElementById('confirm_password').value
-            };
-
-            try {
-                const response = await fetch('http://localhost:5000/api/register', {
+            if(document.getElementById('password').value == document.getElementById('confirm_password').value)
+            {
+                const formData = {
+                    login: document.getElementById('username').value,
+                    pass_hash: document.getElementById('password').value
+                };
+                console.log(formData);
+                fetch('http://192.168.1.8:8000/addUser', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(formData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status != '200 OK') {
+                        alert(data.error);
+                    } else {
+                        window.location.href = 'login.php';
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    alert('Сревер временно недоступен');
                 });
-
-                
-                const contentType = response.headers.get('content-type');
-                if (!contentType || !contentType.includes('application/json')) {
-                    const text = await response.text();
-                    throw new Error(`Ожидался JSON, получили: ${text.substring(0, 100)}...`);
-                }
-
-                const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(data.error || 'Ошибка сервера');
-                }
-
-                
-                window.location.href = 'login.php?registration=success';
-            } catch (error) {
-                console.error('Registration Error:', error);
-                alert(error.message || 'Ошибка при регистрации');
+            }
+            else
+            {
+                alert('Пароли не совпадают');
             }
         });
     </script>
