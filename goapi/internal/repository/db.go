@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"fmt"
 
 	_ "github.com/lib/pq"
 )
@@ -20,7 +21,7 @@ func New(config *Config) *DataBase {
 
 func (data *DataBase) Open() error {
 	db, err := sql.Open("postgres", data.config.DatabaseURL)
-
+	fmt.Println(data.config.DatabaseURL)
 	if err != nil {
 		return err
 	}
@@ -28,7 +29,7 @@ func (data *DataBase) Open() error {
 	if err := db.Ping(); err != nil {
 		return err
 	}
-
+	fmt.Println("ok")
 	data.db = db
 
 	return nil

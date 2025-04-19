@@ -2,4 +2,6 @@ bind_addr = ":8000"
 log_level = "debug"
 
 [database]
-database_url = "user=kp password=admin dbname=ldadb sslmode=disable"
+database_url = "user=kp password=admin dbname=tasksql sslmode=disable"
+[database_task]
+database_url_task =  "user=kp password=admin dbname=postgres sslmode=disable"

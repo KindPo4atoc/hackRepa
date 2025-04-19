@@ -1,104 +1,101 @@
 package repository
 
-import "goapi/internal/entity"
+import (
+	"fmt"
+	"goapi/internal/entity"
+
+	"golang.org/x/crypto/bcrypt"
+)
 
 // структура для взаимодействия с бд
 type DBRepository struct {
 	store *DataBase
 }
 
-func (r *DBRepository) SelectAllLearnData() (entity.ContextData, error) {
-	var users entity.ContextData
+func (r *DBRepository) ValidateUser(login, pass string) (entity.Answer, error) {
+	var dataRow entity.UserData
+	fmt.Println(pass)
 	rows, err := r.store.db.Query(
-		"SELECT loan_id, loan_term, income_annum, loan_amount, cibil_score, loan_status " +
-			"FROM learndata where type_data = 0;",
+		"SELECT passhash "+
+			"FROM users where login = $1;",
+		login,
 	)
 
 	if err != nil {
-		return entity.ContextData{}, err
+		return entity.Answer{}, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+
+		err := rows.Scan(
+			&dataRow.PasswordHash,
+		)
+		if err != nil {
+			return entity.Answer{}, err
+		}
+	}
+	err = bcrypt.CompareHashAndPassword([]byte(dataRow.PasswordHash), []byte(pass))
+	if err != nil {
+		return entity.Answer{Status: err.Error()}, err
+	} else {
+		return entity.Answer{Status: "200 OK"}, nil
+	}
+}
+
+func (r *DBRepository) ExistUser(login string) (entity.Answer, error) {
+	var users entity.ContextData
+	rows, err := r.store.db.Query(
+		"SELECT login "+
+			"FROM users where login = $1;",
+		login,
+	)
+
+	if err != nil {
+		return entity.Answer{}, err
 	}
 	defer rows.Close()
 
 	for rows.Next() {
 		var dataRow entity.UserData
-
 		err := rows.Scan(
-			&dataRow.LoanId,
-			&dataRow.LoanTerm,
-			&dataRow.IncomeAnnum,
-			&dataRow.LoanAmount,
-			&dataRow.CibilScore,
-			&dataRow.LoanStatus,
+			&dataRow.Login,
 		)
 		if err != nil {
-			return entity.ContextData{}, err
+			return entity.Answer{}, err
 		}
 		users.Data = append(users.Data, dataRow)
 	}
-
-	return users, nil
+	if len(users.Data) > 0 {
+		return entity.Answer{Status: "200 OK"}, nil
+	} else {
+		return entity.Answer{Status: "404 Not found"}, nil
+	}
 }
 
-func (r *DBRepository) SelectingDataByClass(classData string) (entity.ContextData, error) {
-	var dataByClass entity.ContextData
+func (r *DBRepository) AddUsers(login, passHash string) (entity.Answer, error) {
+	answer, err := r.ExistUser(login)
+	if err != nil || answer.Status == "200 OK" {
+		return entity.Answer{Status: "User exist"}, err
+	}
 
-	rows, err := r.store.db.Query(
-		"SELECT loan_id, self_employed, income_annum, loan_amount, cibil_score, loan_status "+
-			"FROM learndata where loan_status = $1;",
-		classData,
-	)
+	_, err = r.store.db.Exec("Insert Into users(login, passhash) values($1, $2)", login, passHash)
 
 	if err != nil {
-		return entity.ContextData{}, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var dataRow entity.UserData
-		err := rows.Scan(
-			&dataRow.LoanId,
-			&dataRow.LoanTerm,
-			&dataRow.IncomeAnnum,
-			&dataRow.LoanAmount,
-			&dataRow.CibilScore,
-			&dataRow.LoanStatus,
-		)
-		if err != nil {
-			return entity.ContextData{}, err
-		}
-		dataByClass.Data = append(dataByClass.Data, dataRow)
+		return entity.Answer{Status: err.Error()}, err
 	}
 
-	return dataByClass, nil
+	return entity.Answer{Status: "200 OK"}, nil
 }
-func (r *DBRepository) SelectTestData() (entity.ContextData, error) {
-	var users entity.ContextData
-	rows, err := r.store.db.Query(
-		"SELECT loan_id, loan_term, income_annum, loan_amount, cibil_score, loan_status " +
-			"FROM learndata where type_data = 1;",
-	)
+
+func (r *DBRepository) DestroyDBTask(dbName string) (entity.Answer, error) {
+	cmd := fmt.Sprintf("drop database %s;", dbName)
+	_, err := r.store.db.Exec(cmd)
 
 	if err != nil {
-		return entity.ContextData{}, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var dataRow entity.UserData
-
-		err := rows.Scan(
-			&dataRow.LoanId,
-			&dataRow.LoanTerm,
-			&dataRow.IncomeAnnum,
-			&dataRow.LoanAmount,
-			&dataRow.CibilScore,
-			&dataRow.LoanStatus,
-		)
-		if err != nil {
-			return entity.ContextData{}, err
-		}
-		users.Data = append(users.Data, dataRow)
+		return entity.Answer{Status: err.Error()}, err
+	} else {
+		return entity.Answer{Status: "200 OK"}, nil
 	}
 
-	return users, nil
 }
