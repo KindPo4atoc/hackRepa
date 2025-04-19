@@ -182,11 +182,16 @@ func (s *APIServer) handleAddUser(w http.ResponseWriter, r *http.Request) {
 	}
 }
 func (s *APIServer) handleCreateDB(w http.ResponseWriter, r *http.Request) {
+	// переделать в POST запрос create -> нужно чтобы передавали в EP для create номер задачи
+	var task entity.Task
+	fmt.Println()
+	json.NewDecoder(r.Body).Decode(&task)
+	fmt.Println(task)
 	logrus.Info("Route /createDB: POST request")
 	if err := s.configureDBTask(); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
-	infoTables, err := s.dbTask.Data().CreateDBForTask(1)
+	infoTables, err := s.dbTask.Data().CreateDBForTask(task.IdTask)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -202,8 +207,9 @@ func (s *APIServer) handleCreateDB(w http.ResponseWriter, r *http.Request) {
 }
 func (s *APIServer) handleDropDB(w http.ResponseWriter, r *http.Request) {
 	logrus.Info("Route /dropDB: POST request")
+	dbName := s.dbTask.Data().GetDbName()
 	s.dbTask.Close()
-	answer, err := s.db.Data().DestroyDBTask("task1")
+	answer, err := s.db.Data().DestroyDBTask(dbName)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -235,13 +241,67 @@ func (s *APIServer) handleExecuteCommand(w http.ResponseWriter, r *http.Request)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
+func (s *APIServer) handleGetAllTasks(w http.ResponseWriter, r *http.Request) {
+	logrus.Info("Route /getAllTasks: GET request")
+	tasks, err := s.db.Data().GetAllTasks()
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	w.Header().Set("Content-type", "application/json")
+
+	encoder := json.NewEncoder(w)
+	encoder.SetIndent("", " ")
+	err = encoder.Encode(tasks)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+func (s *APIServer) handleGetTask(w http.ResponseWriter, r *http.Request) {
+	idTask := mux.Vars(r)["item"]
+	logrus.Info("Route /getTask/{item}: GET request")
+	task, err := s.db.Data().GetTask(idTask)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	w.Header().Set("Content-type", "application/json")
+
+	encoder := json.NewEncoder(w)
+	encoder.SetIndent("", " ")
+	err = encoder.Encode(task)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+func (s *APIServer) handleGetTasksByLevel(w http.ResponseWriter, r *http.Request) {
+	level := mux.Vars(r)["item"]
+	logrus.Info("Route /getTasksByLevel/{item}: GET request")
+	task, err := s.db.Data().GetTasksByLevel(level)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	w.Header().Set("Content-type", "application/json")
+
+	encoder := json.NewEncoder(w)
+	encoder.SetIndent("", " ")
+	err = encoder.Encode(task)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
 
 // инициализация роутера
 func (s *APIServer) configureRouter() {
+	//проверить id задач
 	/// определение маршрутов
 	s.router.HandleFunc("/addUser", s.handleAddUser).Methods("POST")
 	s.router.HandleFunc("/validateUser", s.handleValidateUser).Methods("POST")
-	s.router.HandleFunc("/createDB", s.handleCreateDB).Methods("GET")
+	s.router.HandleFunc("/createDB", s.handleCreateDB).Methods("POST")
 	s.router.HandleFunc("/dropDB", s.handleDropDB).Methods("Get")
 	s.router.HandleFunc("/executeCommand", s.handleExecuteCommand).Methods("POST")
+	s.router.HandleFunc("/getAllTasks", s.handleGetAllTasks).Methods("GET")
+	s.router.HandleFunc("/getTask/{item}", s.handleGetTask).Methods("GET")
+	s.router.HandleFunc("/getTasksByLevel/{item}", s.handleGetTasksByLevel).Methods("GET")
 }

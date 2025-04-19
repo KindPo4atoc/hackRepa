@@ -5,5 +5,6 @@ type Task struct {
 	Header          string `json:"header"`
 	DescriptionTask string `json:"description"`
 	LevelTask       string `json:"level"`
+	LoginAuthor     string `json:"author"`
 	PathTotables    string `json:"-"`
 }
