@@ -21,7 +21,7 @@
 .register-button {
     width: 100%;
     padding: 1rem;
-    background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+    background: #2c3e50;
     color: white;
     border: none;
     border-radius: 10px;

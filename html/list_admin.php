@@ -261,6 +261,7 @@
             <nav class="nav-menu">
             <a href="ready_tasks.html" class="nav_element">Готовые задачи</a>
             <a href="offer.html" class="nav_element">Предложения</a>
+            <a href="load_offer.html" class="nav_element">Загрузить Задачу</a>
             </nav>
         </div>
     </header>
