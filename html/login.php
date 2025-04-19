@@ -30,7 +30,7 @@ if (isset($_SESSION['user_id'])) {
                 <label for="username">Логин</label>
                 <div class="input-with-icon">
                     <i class="fas fa-user"></i>
-                    <input type="text" id="username" name="username" value="<?php echo htmlspecialchars($username); ?>" required>
+                    <input placeholder="Введите логин" type="text" id="username" name="username" value="" required>
                 </div>
             </div>
             
@@ -38,7 +38,7 @@ if (isset($_SESSION['user_id'])) {
                 <label for="password">Пароль</label>
                 <div class="input-with-icon">
                     <i class="fas fa-lock"></i>
-                    <input type="password" id="password" name="password" required>
+                    <input placeholder="Введите пароль" type="password" id="password" name="password" required>
                 </div>
             </div>
             

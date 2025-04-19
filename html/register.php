@@ -22,7 +22,7 @@
                 <label for="username">Имя пользователя</label>
                 <div class="input-with-icon">
                     <i class="fas fa-user"></i>
-                    <input type="text" id="username" name="username" value="<?php echo htmlspecialchars($username); ?>" required>
+                    <input placeholder="Введите логин" type="text" id="username" name="username" value="" required>
                 </div>
                 <?php if (!empty($errors['username'])): ?>
                     <span class="field-error"><?php echo htmlspecialchars($errors['username']); ?></span>
@@ -33,7 +33,7 @@
                 <label for="password">Пароль</label>
                 <div class="input-with-icon">
                     <i class="fas fa-lock"></i>
-                    <input type="password" id="password" name="password" required>
+                    <input placeholder="Введите пароль" type="password" id="password" name="password" required>
                 </div>
                 <?php if (!empty($errors['password'])): ?>
                     <span class="field-error"><?php echo htmlspecialchars($errors['password']); ?></span>
@@ -44,7 +44,7 @@
                 <label for="confirm_password">Подтвердите пароль</label>
                 <div class="input-with-icon">
                     <i class="fas fa-lock"></i>
-                    <input type="password" id="confirm_password" name="confirm_password" required>
+                    <input placeholder="Введите пароль" type="password" id="confirm_password" name="confirm_password" required>
                 </div>
                 <?php if (!empty($errors['confirm_password'])): ?>
                     <span class="field-error"><?php echo htmlspecialchars($errors['confirm_password']); ?></span>

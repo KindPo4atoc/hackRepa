@@ -1,7 +1,6 @@
 :root {
-    --primary-color: #6c5ce7;
-    --secondary-color: #a29bfe;
-    --accent-color: #fd79a8;
+    --primary-color: #2c3e50;
+    --accent-color: #2c3e50;
     --dark-color: #2d3436;
     --light-color: #f5f6fa;
     --success-color: #00b894;
@@ -10,7 +9,7 @@
 
 body {
     font-family: 'Poppins', sans-serif;
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    background-color: #2c3e50 ;
     margin: 0;
     padding: 0;
     display: flex;
@@ -130,7 +129,7 @@ input:focus + label {
 }
 
 .links a:hover {
-    color: var(--secondary-color);
+    color: var(--primary-color);
 }
 
 .links a:hover::after {
@@ -167,7 +166,7 @@ input:focus + label {
     left: 15px;
     top: 50%;
     transform: translateY(-50%);
-    color: var(--secondary-color);
+    color: var(--primary-color);
     z-index: 1;
 }
 
