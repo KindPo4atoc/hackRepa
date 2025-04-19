@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL Практика</title>
+    <style>
+        /* Основные стили */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        
+        /* Стили для навигации */
+        .nav {
+            display: flex;
+            background-color: #3498db;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .nav a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 15px;
+            margin-right: 10px;
+            border-radius: 3px;
+            transition: background-color 0.3s;
+        }
+        
+        .nav a:hover {
+            background-color: #2980b9;
+        }
+        
+        /* Стили для задач */
+        .task-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .task-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 20px;
+            flex: 1 1 300px;
+            transition: transform 0.3s;
+        }
+        
+        .task-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .task-card h3 {
+            margin-top: 0;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        
+        .difficulty {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            margin-bottom: 10px;
+        }
+        
+        .easy {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .medium {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .hard {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        /* Стили для SQL кода */
+        .sql-code {
+            background-color: #f0f0f0;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', Courier, monospace;
+            white-space: pre-wrap;
+            border-radius: 0 5px 5px 0;
+            overflow-x: auto;
+        }
+        
+        /* Стили для решения */
+        .solution {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #e8f4fc;
+            border-radius: 5px;
+        }
+        
+        .show-solution {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+        
+        .show-solution:hover {
+            background-color: #2980b9;
+        }
+        
+        /* Стили для фильтров */
+        .filters {
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .filter-group {
+            margin-bottom: 10px;
+        }
+        
+        .filter-group label {
+            margin-right: 10px;
+        }
+        
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .task-card {
+                flex: 1 1 100%;
+            }
+            
+            .nav {
+                flex-direction: column;
+            }
+            
+            .nav a {
+                margin-bottom: 5px;
+                margin-right: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Практика SQL запросов</h1>
+        <p>Улучшите свои навыки работы с SQL, решая практические задачи</p>
+    </header>
+    
+    <div class="nav">
+        <a href="#basics">Основы</a>
+        <a href="#joins">Соединения</a>
+        <a href="#subqueries">Подзапросы</a>
+        <a href="#functions">Функции</a>
+        <a href="#advanced">Продвинутые</a>
+    </div>
+    
+    <div class="filters">
+        <h3>Фильтры</h3>
+        <div class="filter-group">
+            <label>Сложность:</label>
+            <label><input type="checkbox" checked> Легкие</label>
+            <label><input type="checkbox" checked> Средние</label>
+            <label><input type="checkbox" checked> Сложные</label>
+        </div>
+        <div class="filter-group">
+            <label>Тема:</label>
+            <select id="topicFilter">
+                <option value="all">Все темы</option>
+                <option value="basics">Основы</option>
+                <option value="joins">Соединения</option>
+                <option value="subqueries">Подзапросы</option>
+                <option value="functions">Функции</option>
+                <option value="advanced">Продвинутые</option>
+            </select>
+        </div>
+    </div>
+
+    <h2 id="basics">Основные запросы</h2>
+    <div id="basics-container" class="task-container"></div>
+
+    <h2 id="joins">Соединения таблиц</h2>
+    <div id="joins-container" class="task-container"></div>
+
+    <h2 id="subqueries">Подзапросы</h2>
+    <div id="subqueries-container" class="task-container"></div>
+
+    <h2 id="functions">Функции</h2>
+    <div id="functions-container" class="task-container"></div>
+
+    <h2 id="advanced">Продвинутые задачи</h2>
+    <div id="advanced-container" class="task-container"></div>
+
+    <script>
+        async function loadTasks(category) {
+            try {
+                const response = await fetch(`/api/tasks?category=${category}`);
+                if (!response.ok) throw new Error('Ошибка загрузки задач');
+                const tasks = await response.json();
+                
+                const container = document.getElementById(`${category}-container`);
+                container.innerHTML = '';
+                
+                tasks.forEach(task => {
+                    const card = document.createElement('div');
+                    card.className = 'task-card';
+                    card.innerHTML = `
+                        <span class="difficulty ${task.level}">${task.level}</span>
+                        <h3>${task.header}</h3>
+                        <button class="show-solution">
+                            Решить
+                        </button>
+                    `;
+                    container.appendChild(card);
+                });
+
+                // Добавляем обработчики для кнопок
+                container.querySelectorAll('.show-solution').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const solutionDiv = this.nextElementSibling;
+                        solutionDiv.style.display = solutionDiv.style.display === 'block' ? 'none' : 'block';
+                        this.textContent = solutionDiv.style.display === 'block' 
+                            ? 'Скрыть решение' 
+                            : 'Показать решение';
+                    });
+                });
+            } catch (error) {
+                console.error('Ошибка:', error);
+                const container = document.getElementById(`${category}-container`);
+                container.innerHTML = `<p class="error">Ошибка загрузки задач: ${error.message}</p>`;
+            }
+        }
+
+        // Фильтрация задач
+        document.getElementById('topicFilter').addEventListener('change', (e) => {
+            const category = e.target.value;
+            if (category === 'all') {
+                document.querySelectorAll('.task-container').forEach(container => {
+                    container.style.display = 'flex';
+                });
+            } else {
+                document.querySelectorAll('.task-container').forEach(container => {
+                    container.style.display = 'none';
+                });
+                document.getElementById(`${category}-container`).style.display = 'flex';
+            }
+        });
+
+        // Загрузка задач при старте
+        document.addEventListener('DOMContentLoaded', () => {
+            ['basics', 'medium', 'subqueries', 'functions', 'advanced'].forEach(loadTasks);
+        });
+    </script>
+</body>
+</html>

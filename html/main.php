@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Tools</title>
+    <link rel="stylesheet" href="../css/main.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Database Tools</h1>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" data-tab="query">Задача</div>
+            <div class="tab" data-tab="schema">Схема БД</div>
+        </div>
+
+        <div id="query-tab" class="tab-content active">
+            <div class="query-area">
+                <div class="button-group">
+                    <button id="execute-btn">Выполнить запрос</button>
+                    <button id="clear-btn" class="secondary">Очистить</button>
+                </div>
+                <textarea id="sql-query" placeholder="Enter your SQL query here..."></textarea>
+            </div>
+            
+            <div id="result-area" class="results">
+                <!-- Results will be displayed here -->
+            </div>
+            
+        </div>
+
+        <div id="schema-tab" class="tab-content">
+            <div id="schema-container" class="schema-container">
+                <div class="loading"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching functionality
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Remove active class from all tabs and contents
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                // Add active class to clicked tab and corresponding content
+                this.classList.add('active');
+                const tabId = this.getAttribute('data-tab') + '-tab';
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        // SQL Query Interface functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const executeBtn = document.getElementById('execute-btn');
+            const clearBtn = document.getElementById('clear-btn');
+            const formatBtn = document.getElementById('format-btn');
+            const sqlQuery = document.getElementById('sql-query');
+            const resultArea = document.getElementById('result-area');
+            
+            // Execute query
+            executeBtn.addEventListener('click', executeQuery);
+            
+            // Clear query and results
+            clearBtn.addEventListener('click', function() {
+                sqlQuery.value = '';
+                resultArea.innerHTML = '';
+            });
+            
+            // Format SQL
+            formatBtn.addEventListener('click', function() {
+                if (sqlQuery.value.trim()) {
+                    try {
+                        sqlQuery.value = formatSql(sqlQuery.value);
+                    } catch (e) {
+                        showError('Error formatting SQL: ' + e.message);
+                    }
+                }
+            });
+            
+            // Handle Enter key with Ctrl
+            sqlQuery.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && e.ctrlKey) {
+                    executeQuery();
+                }
+            });
+        });
+        
+        function useSampleQuery(query) {
+            document.getElementById('sql-query').value = query;
+        }
+        
+        function executeQuery() {
+            const query = document.getElementById('sql-query').value.trim();
+            if (!query) return;
+            
+            const resultArea = document.getElementById('result-area');
+            resultArea.innerHTML = '<div>Executing query...</div>';
+            
+            fetch('http://localhost:5000/api/execute-query', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ query: query })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'error') {
+                    showError(data.message);
+                } else {
+                    if (data.data) {
+                        // Display results in a table for SELECT queries
+                        displayResults(data.data, data.columns);
+                    } else {
+                        // Show success message for other queries
+                        showSuccess(data.message);
+                    }
+                }
+            })
+            .catch(error => {
+                showError('Request failed: ' + error.message);
+            });
+        }
+        
+        function displayResults(data, columns) {
+            const resultArea = document.getElementById('result-area');
+            
+            if (data.length === 0) {
+                resultArea.innerHTML = '<div class="success">Query executed successfully. No rows returned.</div>';
+                return;
+            }
+            
+            let html = `
+                <div class="success">Query executed successfully. ${data.length} rows returned.</div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                ${columns.map(col => `<th>${col}</th>`).join('')}
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            data.forEach(row => {
+                html += '<tr>';
+                columns.forEach(col => {
+                    html += `<td>${row[col] !== null ? row[col] : 'NULL'}</td>`;
+                });
+                html += '</tr>';
+            });
+            
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            resultArea.innerHTML = html;
+        }
+        
+        function showError(message) {
+            const resultArea = document.getElementById('result-area');
+            resultArea.innerHTML = `<div class="error">${message}</div>`;
+        }
+        
+        function showSuccess(message) {
+            const resultArea = document.getElementById('result-area');
+            resultArea.innerHTML = `<div class="success">${message}</div>`;
+        }
+        
+
+        // Database Schema functionality with improved drag-and-drop
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.getElementById('schema-container');
+            let tables = {};
+            let relationships = [];
+            let draggedCard = null;
+            let offsetX = 0;
+            let offsetY = 0;
+            
+            fetch('http://localhost:5000/api/schema')
+                .then(response => response.json())
+                .then(data => {
+                    tables = data.tables;
+                    relationships = data.relationships;
+                    container.innerHTML = '';
+                    createTableCards();
+                    setupDragAndDrop();
+                })
+                .catch(error => {
+                    container.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+                    console.error('Error:', error);
+                });
+            
+            function createTableCards() {
+                const tableCount = Object.keys(tables).length;
+                if (tableCount === 0) return;
+                
+                const minSpacing = 180;
+                const cardWidth = 250;
+                const cardHeight = 200;
+                const centerX = window.innerWidth / 2;
+                const centerY = window.innerHeight / 2;
+                const baseRadius = Math.min(window.innerWidth, window.innerHeight) / 3;
+                const dynamicRadius = Math.max(
+                    (tableCount * minSpacing) / (2 * Math.PI),
+                    baseRadius
+                );
+                
+                const angleStep = (2 * Math.PI) / tableCount;
+                let angle = 0;
+                
+                const cards = [];
+                for (const [tableName, columns] of Object.entries(tables)) {
+                    const tableCard = document.createElement('div');
+                    tableCard.className = 'table-card';
+                    tableCard.id = `table-${tableName}`;
+                    
+                    let tableHTML = `<div class="table-name">${tableName}</div>`;
+                    
+                    columns.forEach(column => {
+                        let badges = '';
+                        if (column.is_pk) badges += '<span class="pk-badge">PK</span>';
+                        if (column.is_fk) badges += '<span class="fk-badge">FK</span>';
+                        
+                        tableHTML += `
+                            <div class="column-row">
+                                <div class="column-name">${column.name}${badges}</div>
+                                <div class="column-type">${column.type}</div>
+                            </div>
+                        `;
+                    });
+                    
+                    tableCard.innerHTML = tableHTML;
+                    container.appendChild(tableCard);
+                    cards.push({ element: tableCard, angle });
+                    angle += angleStep;
+                }
+                
+                positionCards(cards, dynamicRadius, centerX, centerY);
+                
+                let resizeTimer;
+                window.addEventListener('resize', () => {
+                    clearTimeout(resizeTimer);
+                    resizeTimer = setTimeout(() => {
+                        const newCenterX = window.innerWidth / 2;
+                        const newCenterY = window.innerHeight / 2;
+                        positionCards(cards, dynamicRadius, newCenterX, newCenterY);
+                    }, 200);
+                });
+            }
+            
+            function positionCards(cards, baseRadius, centerX, centerY) {
+                cards.forEach((card, i) => {
+                    if (!card.element.style.left || !card.element.style.top) {
+                        // Only for initial positioning
+                        let bestPosition = findBestPosition(
+                            card.element,
+                            card.angle,
+                            baseRadius,
+                            centerX,
+                            centerY,
+                            cards.slice(0, i)
+                        );
+                        
+                        card.element.style.left = `${bestPosition.x}px`;
+                        card.element.style.top = `${bestPosition.y}px`;
+                        card.element.style.position = 'absolute';
+                        card.element.style.transition = 'left 0.3s, top 0.3s';
+                    }
+                });
+            }
+            
+            function findBestPosition(element, angle, baseRadius, centerX, centerY, placedCards) {
+                const elementWidth = 250;
+                const elementHeight = 200;
+                let radius = baseRadius;
+                let bestPosition = { x: 0, y: 0 };
+                let hasCollision = true;
+                let attempts = 0;
+                const maxAttempts = 100;
+                
+                while (hasCollision && attempts < maxAttempts) {
+                    bestPosition.x = centerX + radius * Math.cos(angle) - elementWidth / 2;
+                    bestPosition.y = centerY + radius * Math.sin(angle) - elementHeight / 2;
+                    
+                    hasCollision = checkCollision(
+                        bestPosition.x,
+                        bestPosition.y,
+                        elementWidth,
+                        elementHeight,
+                        placedCards
+                    );
+                    
+                    if (hasCollision) {
+                        radius += 10;
+                        attempts++;
+                    }
+                }
+                
+                return bestPosition;
+            }
+            
+            function checkCollision(x, y, width, height, placedCards) {
+                const rect1 = {
+                    left: x,
+                    right: x + width,
+                    top: y,
+                    bottom: y + height
+                };
+                
+                return placedCards.some(card => {
+                    const cardRect = card.element.getBoundingClientRect();
+                    const rect2 = {
+                        left: parseFloat(card.element.style.left),
+                        right: parseFloat(card.element.style.left) + cardRect.width,
+                        top: parseFloat(card.element.style.top),
+                        bottom: parseFloat(card.element.style.top) + cardRect.height
+                    };
+                    
+                    return !(
+                        rect1.right < rect2.left || 
+                        rect1.left > rect2.right || 
+                        rect1.bottom < rect2.top || 
+                        rect1.top > rect2.bottom
+                    );
+                });
+            }
+            
+            function setupDragAndDrop() {
+                const cards = document.querySelectorAll('.table-card');
+                
+                cards.forEach(card => {
+                    const header = card.querySelector('.table-name');
+                    
+                    header.addEventListener('mousedown', startDrag);
+                    card.addEventListener('mousedown', function(e) {
+                        if (e.target === card) {
+                            startDrag.call(header, e);
+                        }
+                    });
+                    
+                    card.addEventListener('touchstart', function(e) {
+                        if (e.target === card || e.target === header) {
+                            const touch = e.touches[0];
+                            const mouseEvent = new MouseEvent('mousedown', {
+                                clientX: touch.clientX,
+                                clientY: touch.clientY
+                            });
+                            startDrag.call(header, mouseEvent);
+                        }
+                    });
+                });
+                
+                function startDrag(e) {
+                    draggedCard = this.closest('.table-card');
+                    const cardRect = draggedCard.getBoundingClientRect();
+                    const containerRect = container.getBoundingClientRect();
+                    
+                    // Calculate current card position relative to container
+                    const cardX = parseFloat(draggedCard.style.left) || (cardRect.left - containerRect.left);
+                    const cardY = parseFloat(draggedCard.style.top) || (cardRect.top - containerRect.top);
+                    
+                    // Calculate offset from mouse to card position
+                    offsetX = e.clientX - containerRect.left - cardX;
+                    offsetY = e.clientY - containerRect.top - cardY;
+                    
+                    draggedCard.style.zIndex = '1000';
+                    draggedCard.style.transition = 'none'; // Disable transitions during drag
+                    e.preventDefault();
+                }
+                
+                function dragCard(e) {
+                    if (draggedCard) {
+                        const containerRect = container.getBoundingClientRect();
+                        const newX = e.clientX - containerRect.left - offsetX;
+                        const newY = e.clientY - containerRect.top - offsetY;
+                        
+                        draggedCard.style.left = `${newX}px`;
+                        draggedCard.style.top = `${newY}px`;
+                    }
+                }
+                
+                function stopDrag() {
+                    if (draggedCard) {
+                        draggedCard.style.zIndex = '';
+                        draggedCard.style.transition = 'left 0.2s, top 0.2s'; // Re-enable transitions
+                        draggedCard = null;
+                    }
+                }
+                
+                document.addEventListener('mousemove', dragCard);
+                document.addEventListener('touchmove', function(e) {
+                    if (draggedCard) {
+                        const touch = e.touches[0];
+                        const mouseEvent = new MouseEvent('mousemove', {
+                            clientX: touch.clientX,
+                            clientY: touch.clientY
+                        });
+                        dragCard(mouseEvent);
+                        e.preventDefault();
+                    }
+                }, { passive: false });
+                
+                document.addEventListener('mouseup', stopDrag);
+                document.addEventListener('touchend', stopDrag);
+            }
+        });
+    </script>
+</body>
+</html>
