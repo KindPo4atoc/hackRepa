@@ -1,0 +1,4 @@
+id,product_name,category_fk
+1,Ноутбук,2
+2,Смартфон,2
+3,Книга,1

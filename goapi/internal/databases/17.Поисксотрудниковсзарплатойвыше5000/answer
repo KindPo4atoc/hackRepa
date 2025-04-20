@@ -1,0 +1,1 @@
+SELECT name, salary  FROM emploees  WHERE salary > 5000;

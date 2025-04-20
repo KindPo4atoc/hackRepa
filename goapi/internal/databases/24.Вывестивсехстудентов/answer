@@ -1,0 +1,37 @@
+WITH monthly_sales AS (
+  SELECT 
+    e.employee_id,
+    e.department_id,
+    EXTRACT(MONTH FROM s.sale_date) AS month,
+    SUM(s.amount) AS total_sales
+  FROM employees e
+  JOIN sales s ON e.employee_id = s.employee_id
+  WHERE EXTRACT(YEAR FROM s.sale_date) = 2023
+  GROUP BY e.employee_id, e.department_id, EXTRACT(MONTH FROM s.sale_date)
+),
+department_avg AS (
+  SELECT 
+    department_id,
+    month,
+    AVG(total_sales) AS avg_sales
+  FROM monthly_sales
+  GROUP BY department_id, month
+)
+SELECT 
+  e.name,
+  d.department_name,
+  ms.month,
+  ms.total_sales,
+  da.avg_sales
+FROM monthly_sales ms
+JOIN department_avg da 
+  ON ms.department_id = da.department_id 
+  AND ms.month = da.month
+JOIN employees e ON ms.employee_id = e.employee_id
+JOIN departments d ON e.department_id = d.department_id
+WHERE ms.total_sales > da.avg_sales
+QUALIFY COUNT(*) OVER (PARTITION BY ms.employee_id) = (
+  SELECT COUNT(DISTINCT month) 
+  FROM monthly_sales 
+  WHERE department_id = ms.department_id
+);

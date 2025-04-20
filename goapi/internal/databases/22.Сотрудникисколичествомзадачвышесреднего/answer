@@ -1,0 +1,12 @@
+SELECT name, COUNT(task_id) AS task_count  
+FROM employees 
+LEFT JOIN tasks ON employee_id = employee_fk 
+GROUP BY name  
+HAVING COUNT(task_id) > (  
+    SELECT AVG(task_count)  
+    FROM (  
+        SELECT COUNT(task_id) AS task_count  
+        FROM tasks  
+        GROUP BY employee_id  
+    ) AS avg_tasks  
+);

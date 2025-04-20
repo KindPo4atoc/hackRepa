@@ -1,0 +1,1 @@
+SELECT p.product_name, SUM(p.price * s.quantity) AS total_revenue  FROM products p  JOIN sales s ON p.product_id = s.product_id  WHERE EXTRACT(YEAR FROM s.sale_date) = 2023  GROUP BY p.product_name  ORDER BY total_revenue DESC  LIMIT 3;

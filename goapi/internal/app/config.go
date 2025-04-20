@@ -8,6 +8,7 @@ type Config struct {
 	LogLevel     string                 `toml:"log_level"`
 	DBConfig     *repository.Config     `toml:"database"`
 	DBTaskConfig *repository.ConfigTask `toml:"database_task"`
+	DBUserConfig *repository.ConfigUser `toml:"database_user"`
 }
 
 func NewConfig() *Config {
