@@ -198,7 +198,7 @@ if (isset($_COOKIE['login']))
 
     <script>
         window.onbeforeunload = function(){
-            fetch(`http://192.168.1.8:8000/dropDB`)
+            fetch(`http://192.168.1.8:8000/dropDBUser`)
             .then(response => response.json())
             .then(data => { 
                 if(data.status === '200 OK');
@@ -209,45 +209,32 @@ if (isset($_COOKIE['login']))
                     <td colspan="6" class="error">Не удалось отключиться</td>
                 </tr>`;
             });           
+        };
+        function getCookie(name) {
+            const fullCookieString = '; ' + document.cookie;
+            const splitCookie = fullCookieString.split('; ' + name + '=');
+            return splitCookie.length === 2 ? splitCookie.pop().split(';').shift() : null;
         }
         window.onload = function () {
             let idTask = localStorage.getItem('id')
             let task;
             var infoTables;
-            fetch(`http://192.168.1.8:8000/getTask/${idTask}`)
-            .then(response => response.json())
-            .then(data => { 
-                console.log(data);
-                const container = document.getElementById('tt');
-                const card = document.createElement('div');
-                card.className = 'result';
-                card.innerHTML = `
-                    <p>${data.description}</p>
-                `;
-                container.insertBefore(card, container.firstChild);
-                task = data
-                console.log(task)
-                fetch('http://192.168.1.8:8000/createDB', {
+            fetch('http://192.168.1.8:8000/createDBUser', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body:  JSON.stringify(task)
-                })
-                .then(response => response.json())
-                .then(data => {
-                    infoTables = data.tables;  
-                })
-                .catch(error => {
-                    showError('Request failed: ' + error.message);
-                });
+                body:  JSON.stringify({'login' : getCookie('login')})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.status !== '200 OK')
+                    showError('Request failed: ' + error.status);
             })
             .catch(error => {
-                console.error('Ошибка загрузки данных:', error);
-                tableBody.innerHTML = `<tr>
-                    <td colspan="6" class="error">Не удалось загрузить данные</td>
-                </tr>`;
-            });           
+                showError('Request failed: ' + error.message);
+            });
+           
         };
         // Tab switching functionality
         document.querySelectorAll('.tab').forEach(tab => {
@@ -298,7 +285,7 @@ if (isset($_COOKIE['login']))
             const resultArea = document.getElementById('result-area');
             resultArea.innerHTML = '<div>Executing query...</div>';
             
-            fetch('http://192.168.1.8:8000/executeCommand', {
+            fetch('http://192.168.1.8:8000/executeCommandUser', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -313,11 +300,13 @@ if (isset($_COOKIE['login']))
                     if (data.data) {
                         // Display results in a table for SELECT queries
                         displayResults(data.data, data.columns);
-                    } else {
+                    }
+                    else {
                         // Show success message for other queries
-                        showSuccess(data.message);
+                        showSuccess(data.status);
                     }
                 }
+                createSchema();
             })
             .catch(error => {
                 showError('Request failed: ' + error.message);
@@ -374,8 +363,9 @@ if (isset($_COOKIE['login']))
         }
         
 
-        // Database Schema functionality with improved drag-and-drop
-        document.addEventListener('DOMContentLoaded', function() {
+        //Database Schema functionality with improved drag-and-drop
+        //document.addEventListener('DOMContentLoaded', function() {
+        function createSchema(){
             const container = document.getElementById('schema-container');
             let tables = {};
             let relationships = [];
@@ -383,7 +373,7 @@ if (isset($_COOKIE['login']))
             let offsetX = 0;
             let offsetY = 0;
             
-            fetch('http://192.168.1.8:8000/getInfoTable')
+            fetch('http://192.168.1.8:8000/getInfoTablesUser')
                 .then(response => response.json())
                 .then(data => {
                     console.log(data)
@@ -617,7 +607,7 @@ if (isset($_COOKIE['login']))
                 document.addEventListener('mouseup', stopDrag);
                 document.addEventListener('touchend', stopDrag);
             }
-        });
+        };
     </script>
 </body>
 </html>
