@@ -1,7 +1,8 @@
 <?php
-if ($_COOKIE['role'] == '1')
-{
-?><!DOCTYPE html>
+   if ($_COOKIE['role'] == '1')
+   {
+?>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -14,6 +15,12 @@ if ($_COOKIE['role'] == '1')
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background-color: #f5f7fa;
+            color: #2c3e50;
         }
         h4{
             margin-top: 5px;
@@ -311,9 +318,9 @@ if ($_COOKIE['role'] == '1')
                 <span>SQL Practice</span>
             </a>
             <nav class="nav-menu">
-                <a href="ready_tasks.html" class="nav_element">Готовые задачи</a>
-                <a href="offer.html" class="nav_element">Предложения</a>
-                <a href="load_offer.html" class="nav_element">Загрузить Задачу</a>
+                <a href="ready_tasks.php" class="nav_element">Готовые задачи</a>
+                <a href="offer.php" class="nav_element">Предложения</a>
+                <a href="load_offer.php" class="nav_element">Загрузить Задачу</a>
                 </div>
             </nav>
         </div>
@@ -452,9 +459,10 @@ if ($_COOKIE['role'] == '1')
 </body>
 </html>
 <?php
-}
-else
-{
-    header('Location: list_tasks.php');
-}
+    }
+    else
+    {
+        header('Location: list_tasks.php');
+    }
 ?>
+

@@ -1,3 +1,7 @@
+<?php
+   if ($_COOKIE['role'] == '1')
+   {
+?>
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -10,6 +14,77 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+        }
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-btn {
+            background-color: #3498db;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.3s;
+        }
+
+        .dropdown-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: #f9f9f9;
+            min-width: 200px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            border-radius: 5px;
+            overflow: hidden;
+            z-index: 1000;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .dropdown-item {
+            color: #333;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.2s;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f1f1f1;
+        }
+        body{
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background-color: #f5f7fa;
+            color: #2c3e50;
+        }
+        .manual{
+            color: #2c3e50;
+            background-color: white;
+            border: solid;
+            border-radius: 5px;
+            border-color: #2c3e50 ;
+            text-align: center;
+            margin-left: 30px;
+            margin-right: 30px;
+            margin-top: 30px;
+            font-size: 25px;
+           
+        
         }
         h3{
             display: flex;
@@ -29,7 +104,7 @@
         h4{
             margin-top: 5px;
         }
-        h4, h2, h3 {
+        h2, h3, p {
             color: #2c3e50;
         }
         
@@ -95,12 +170,9 @@
             gap: 10px;
         }
         .m-desc{
-            width: 400px;
-            height: 50px;
-            max-width: 400px;
-            max-height: 50px;
-            min-width: 400px;
-            min-height: 50px;
+            width: 800px;
+            height: 80px;
+            resize: none;
             padding: 0.2rem;
             border: 2px solid #b4b4b4;
             border-radius: 10px;
@@ -113,12 +185,9 @@
             margin-left: -15px;
         }
         .desc{
-            width: 400px;
-            height: 200px;
-            max-width: 400px;
-            max-height: 200px;
-            min-width: 400px;
-            min-height: 200px;
+            width: 800px;
+            height: 350px;
+            resize: none;
             padding: 0.2rem;
             border: 2px solid #b4b4b4;
             border-radius: 10px;
@@ -195,10 +264,17 @@
 
         .descriptions{
             margin-top: 50px;
-            margin-left: 37.2%;  
+            margin-left: 19.5%;  
             display: flex; 
             flex-direction: column; 
-            min-height: 100vh;         
+            min-height: 100vh;
+            background-color: white;
+            border: #2c3e50 solid ;
+            border-radius: 5px;
+            padding: 30px;
+            padding-left: 180px;
+            width: 1150px;
+            margin-bottom: 30px;
         }
           
         .field__wrapper {
@@ -215,7 +291,7 @@
 }
  
 .field__file-wrapper {
-  width: 31%;
+  width:800px;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -227,6 +303,7 @@
           align-items: center;
   -ms-flex-wrap: wrap;
       flex-wrap: wrap;
+    margin-left: -10px;
 }
  
 .field__file-fake {
@@ -291,9 +368,11 @@
         border-radius: 5px;
         cursor: pointer;
         width: 250px;
-        margin-left: 4.5%;
-        
+        height: 80px;
+        margin-left: 25%;
+        margin-top: 50px;
         transition: background-color 0.3s;
+        font-size: 25px;
     }
     .SendBtn:hover {
         background-color: #2980b9;
@@ -327,7 +406,7 @@
         </div>
     </header>
     <?php
-    if(!isset($_COOKIE['login']))
+    if(!isset($_COOKIE['login'])) 
     { 
     ?>
     <h1>Для того чтобы предложить свою задачу необходимо <a href='login.php'>авторизоваться</a></h1>
@@ -336,11 +415,11 @@
     else
     {
     ?>
-    <div>
-        <p>Для отправки своей задачи необходимо заполнить форму расположенную ниже.</p>
-        <p>В заголовке задачи необходимо кратко обозначить суть задачи (например: "Нахождение средней скорости движения")</p>
-        <p>В описании задачи необходимо подробно изложить суть задачи, описать таблицы и данные, которые в них храняться.</p>
-        <p>Далее необходимо прикрепить файлы в формате .csv, в которых храняться данные.</p>
+    <div class="manual">
+        <p class="1">Для отправки своей задачи необходимо заполнить форму расположенную ниже.</p>
+        <p class="2">В заголовке задачи необходимо кратко обозначить суть задачи (например: "Нахождение средней скорости движения")</p>
+        <p class="3">В описании задачи необходимо подробно изложить суть задачи, описать таблицы и данные, которые в них храняться.</p>
+        <p class="4">Далее необходимо прикрепить файлы в формате .csv, в которых храняться данные.</p>
     </div>
     
     <div class="descriptions">
@@ -376,9 +455,9 @@
 
     <footer class="app-footer">
         <div class="footer-content">
-            <div class="footer-section">
+            <div class="footer-section" style="color: white;">
                 <h4>О проекте</h4>
-                <p>Практическая платформа для изучения SQL через решение реальных задач</p>
+                <p style="color: white;">Практическая платформа для изучения SQL через решение реальных задач</p>
             </div>
             <div class="footer-section">
                 <h4>Контакты</h4>
@@ -464,3 +543,11 @@
     </script>
 </body>
 </html>
+<?php
+    }
+    else
+    {
+        header('Location: list_tasks.php');
+    }
+?>
+

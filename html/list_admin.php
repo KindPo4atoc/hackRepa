@@ -1,7 +1,4 @@
-<?php
-    if()
-    {
-?>
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -263,9 +260,9 @@
                 <span>SQL Practice</span>
             </a>
             <nav class="nav-menu">
-            <a href="ready_tasks.html" class="nav_element">Готовые задачи</a>
-            <a href="offer.html" class="nav_element">Предложения</a>
-            <a href="load_offer.html" class="nav_element">Загрузить Задачу</a>
+            <a href="ready_tasks.php" class="nav_element">Готовые задачи</a>
+            <a href="offer.php" class="nav_element">Предложения</a>
+            <a href="load_offer.php" class="nav_element">Загрузить Задачу</a>
             </nav>
         </div>
     </header>
@@ -398,10 +395,3 @@ ORDER BY employee_count DESC;</div>
     </script>
 </body>
 </html>
-<?php
-    }
-    else
-    {
-        header('Location: list_tasks.php');
-    }
-?>

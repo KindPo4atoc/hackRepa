@@ -215,14 +215,26 @@
             color: white;
         }
 
-        footer {
-            background: #2c3e50;
+        .app-footer {
+            background-color: #2c3e50;
             color: white;
-            text-align: center;
             padding: 2rem;
-            margin-top: 3rem;
+            margin-top: 40px;
         }
 
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .footer-section {
+            flex: 1;
+            min-width: 250px;
+        }
         @media (max-width: 768px) {
             .container {
                 padding: 10px;

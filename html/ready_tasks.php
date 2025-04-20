@@ -1,7 +1,8 @@
 <?php
-if ($_COOKIE['role'] == '1')
-{
-?><!DOCTYPE html>
+   if ($_COOKIE['role'] == '1')
+   {
+?>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -384,9 +385,9 @@ if ($_COOKIE['role'] == '1')
 </body>
 </html>
 <?php
-}
-else
-{
-    header('Location: list_tasks.php');
-}
+    }
+    else
+    {
+        header('Location: list_tasks.php');
+    }
 ?>
