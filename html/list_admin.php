@@ -1,3 +1,7 @@
+<?php
+    if()
+    {
+?>
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -394,3 +398,10 @@ ORDER BY employee_count DESC;</div>
     </script>
 </body>
 </html>
+<?php
+    }
+    else
+    {
+        header('Location: list_tasks.php');
+    }
+?>

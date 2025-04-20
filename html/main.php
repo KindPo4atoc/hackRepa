@@ -1,3 +1,7 @@
+<?php
+if (isset($_COOKIE['login']))
+{
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -138,15 +142,16 @@
     </style>
 </head>
 <body>
-    <header class="app-header">
+<header class="app-header">
         <div class="header-content">
             <a href="#" class="logo">
                 <i class="fas fa-database logo-icon"></i>
                 <span>SQL Practice</span>
             </a>
             <nav class="nav-menu">
-                <a href="main.php" class="nav_element">Песочница</a>
-                <a href="guid.html" class="nav_element">Справочник</a>
+                <a href="load_offer.php" class="nav_element">Предложить задачу</a>
+                <a href="sandbox.php" class="nav_element">Песочница</a>
+                <a href="guid.php" class="nav_element">Справочник</a>
                 <div class="dropdown">
                     <button class="dropdown-btn">
                         <i class="fas fa-bars menu-icon"></i>
@@ -158,6 +163,7 @@
                         <a href="list_tasks.php#hard" class="dropdown-item">Сложные</a>
                     </div>
                 </div>
+                <a href="login.php" class="nav_element"><?=isset($_COOKIE["login"])?$_COOKIE["login"]:'Авторизация'?></a>
             </nav>
         </div>
     </header>
@@ -191,6 +197,19 @@
     </div>
 
     <script>
+        window.onbeforeunload = function(){
+            fetch(`http://192.168.1.8:8000/dropDB`)
+            .then(response => response.json())
+            .then(data => { 
+                if(data.status === '200 OK');
+            })
+            .catch(error => {
+                console.error('Ошибка Окончания работы с БД:', error);
+                tableBody.innerHTML = `<tr>
+                    <td colspan="6" class="error">Не удалось отключиться</td>
+                </tr>`;
+            });           
+        }
         window.onload = function () {
             let idTask = localStorage.getItem('id')
             let task;
@@ -288,7 +307,7 @@
             })
             .then(response => response.json())
             .then(data => {
-                if (data.status === 'Wrong answer') {
+                if (data.status !== '200 OK') {
                     showError(data.status);
                 } else {
                     if (data.data) {
@@ -324,14 +343,16 @@
                         </thead>
                         <tbody>
             `;
-            
-            data.forEach(row => {
+            for(let i = 0; i < data.length; i++)
+            {
                 html += '<tr>';
-                columns.forEach(col => {
-                    html += `<td>${row[col] !== null ? row[col] : 'NULL'}</td>`;
-                });
+                for(let j = 0; j < data[i].length; j++)
+                {
+                    html += `<td>${data[i][j] !== '' ? data[i][j] : 'NULL'}</td>`;
+                }
                 html += '</tr>';
-            });
+            }
+            
             
             html += `
                         </tbody>
@@ -600,3 +621,10 @@
     </script>
 </body>
 </html>
+<?php
+}
+else
+{
+    header('Location: list_tasks.php');
+}
+?>

@@ -303,28 +303,53 @@
 <body>
     <header class="app-header">
         <div class="header-content">
-            <a href="list_admin.php" class="logo">
+            <a href="#" class="logo">
                 <i class="fas fa-database logo-icon"></i>
                 <span>SQL Practice</span>
             </a>
             <nav class="nav-menu">
-                <a href="ready_tasks.html" class="nav_element">Готовые задачи</a>
-                <a href="offer.html" class="nav_element">Предложения</a>
-                <a href="load_offer.html" class="nav_element">Загрузить Задачу</a>
+                <a href="load_offer.php" class="nav_element">Предложить задачу</a>
+                <a href="sandbox.php" class="nav_element">Песочница</a>
+                <a href="guid.php" class="nav_element">Справочник</a>
+                <div class="dropdown">
+                    <button class="dropdown-btn">
+                        <i class="fas fa-bars menu-icon"></i>
+                        Задачи
+                    </button>
+                    <div class="dropdown-content">
+                        <a href="list_tasks.php#easy" class="dropdown-item">Легкие</a>
+                        <a href="list_tasks.php#medium" class="dropdown-item">Средние</a>
+                        <a href="list_tasks.php#hard" class="dropdown-item">Сложные</a>
+                    </div>
                 </div>
+                <a href="login.php" class="nav_element"><?=isset($_COOKIE["login"])?$_COOKIE["login"]:'Авторизация'?></a>
             </nav>
         </div>
     </header>
-    
-    <h1>Загрузка своей задачи</h1>
+    <?php
+    if(!isset($_COOKIE['login']))
+    { 
+    ?>
+    <h1>Для того чтобы предложить свою задачу необходимо <a href='login.php'>авторизоваться</a></h1>
+    <?php
+    }
+    else
+    {
+    ?>
+    <div>
+        <p>Для отправки своей задачи необходимо заполнить форму расположенную ниже.</p>
+        <p>В заголовке задачи необходимо кратко обозначить суть задачи (например: "Нахождение средней скорости движения")</p>
+        <p>В описании задачи необходимо подробно изложить суть задачи, описать таблицы и данные, которые в них храняться.</p>
+        <p>Далее необходимо прикрепить файлы в формате .csv, в которых храняться данные.</p>
+    </div>
     
     <div class="descriptions">
-            <h2>Краткое описание:</h2>
-            <textarea class="m-desc" name="#" id="#"></textarea>
+            <h2>Заголовок задачи:</h2>
+            <textarea class="m-desc" name="small" id="small"></textarea>
             
         
-            <h2>Описание:</h2>
-            <textarea class="desc" name="#" id="#"></textarea>
+            <h2>Описание задачи:</h2>
+            <textarea class="desc" name="full" id="full"></textarea>
             
         
             <h2>Файл:</h2>
@@ -334,7 +359,7 @@
                    
                 <label class="field__file-wrapper" for="field__file-2">
                   <div class="field__file-fake">Файл не выбран</div>
-                  <div class="field__file-button">Выбрать</div>
+                  <div class="field__file-button">Добавить файл</div>
                 </label>
                    
              </div>
@@ -345,7 +370,9 @@
         
     </div>
     
-    
+    <?php
+    }
+    ?>
 
     <footer class="app-footer">
         <div class="footer-content">
@@ -372,22 +399,68 @@
             © 2023 SQL Practice. Все права защищены.
         </div>
     </footer>
-</body>
     <script>
         let fields = document.querySelectorAll('.field__file');
+        const filesNames = new Array();
+        const filesData = new Array();
         Array.prototype.forEach.call(fields, function (input) {
-          let label = input.nextElementSibling,
+            let label = input.nextElementSibling,
             labelVal = label.querySelector('.field__file-fake').innerText;
-      
-          input.addEventListener('change', function (e) {
-            let countFiles = '';
-            if (this.files && this.files.length >= 1)
-              countFiles = this.files.length;
-      
-            if (countFiles)
-              label.querySelector('.field__file-fake').innerText = 'Выбрано файлов: ' + countFiles;
-            else
-              label.querySelector('.field__file-fake').innerText = labelVal;
+            
+            input.addEventListener('change', function (e) {
+            
+                console.log(this.files);
+                for(let i = 0; i < this.files.length; i++)
+                {
+                    filesNames.push(this.files[i].name);
+                    const reader = new FileReader();
+        
+                    reader.onload = function(e) {
+                        filesData.push(e.target.result);
+                    };
+
+                    reader.readAsText(this.files[i]);
+                }
+                
+                
+                if (filesNames.length > 0)
+                label.querySelector('.field__file-fake').innerText = 'Выбрано файлов: ' + filesNames;
+                else
+                label.querySelector('.field__file-fake').innerText = labelVal;
           });
         });
+        var button = document.querySelector('.SendBtn');
+        button.addEventListener('click', function(event) {
+            let header = document.getElementById('small');
+            let descript = document.getElementById('full');
+            const formData = {
+                'header' : document.getElementById('small').value,
+                'description' : document.getElementById('full').value,
+                'fileNames' : filesNames,
+                'contents' : filesData
+            }
+
+            fetch('http://192.168.1.8:8000/addTask', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status !== '200 OK') {
+                    showError(data.status);
+                } else {
+                    alert("Данные успешно загружены");
+                }
+            })
+            .catch(error => {
+                showError('Request failed: ' + error.message);
+            });
+
+        });
+
     </script>
+</body>
+</html>

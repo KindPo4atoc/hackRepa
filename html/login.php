@@ -2,7 +2,7 @@
 session_start();
 
 if (isset($_COOKIE['login'])) {
-    header("Location: list_tasks.html");
+    header("Location: list_tasks.php");
     exit;
 }
 ?>
@@ -69,11 +69,15 @@ if (isset($_COOKIE['login'])) {
             })
             .then(response => response.json())
             .then(data => { 
-                if (data.status != '200 OK') {
+                if (data.status != '0' && data.status != '1') {
                     alert(data.error);
                 } else {
-                    document.cookie = 'login=' + formData.login;
-                    window.location.href = 'list_tasks.html';
+                    document.cookie = 'login=' + formData.login + '; max-age=3600';
+                    document.cookie = 'role=' + data.status + '; max-age=3600';
+                    if(data.status === '0')
+                        window.location.href = 'list_tasks.php';
+                    else
+                        window.location.href = 'ready_tasks.php';
                 }
             })
             .catch((error) => {

@@ -19,7 +19,7 @@
             color: #2c3e50;
         }
         
-        h2, h3 {
+        h1, h2, h3 {
             color: #2c3e50;
         }
         
@@ -50,8 +50,6 @@
             display: flex;
             flex-wrap: wrap;
             gap: 20px;
-            
-           
         }
         
         .task-card {
@@ -61,8 +59,6 @@
             padding: 20px;
             flex: 1 1 300px;
             transition: transform 0.3s;
-            margin: 20px;
-            
         }
         
         .task-card:hover {
@@ -84,17 +80,17 @@
             margin-bottom: 10px;
         }
         
-        .easy {
+        .Easy {
             background-color: #d4edda;
             color: #155724;
         }
         
-        .medium {
+        .Medium {
             background-color: #fff3cd;
             color: #856404;
         }
         
-        .hard {
+        .Hard {
             background-color: #f8d7da;
             color: #721c24;
         }
@@ -120,19 +116,6 @@
             border-radius: 5px;
         }
         
-        .DownloadBtn{
-            background-color: #3498db;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: background-color 0.3s;
-        }
-        .DownloadBtn:hover {
-            background-color: #2980b9;
-        }
         .show-solution {
             background-color: #3498db;
             color: white;
@@ -188,7 +171,6 @@
             top: 0;
             z-index: 1000;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            width: 100%;
         }
 
         .header-content {
@@ -256,6 +238,58 @@
             flex: 1;
             min-width: 250px;
         }
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-btn {
+            background-color: #3498db;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.3s;
+        }
+
+        .dropdown-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: #f9f9f9;
+            min-width: 200px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            border-radius: 5px;
+            overflow: hidden;
+            z-index: 1000;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .dropdown-item {
+            color: #333;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.2s;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f1f1f1;
+        }
+
         @keyframes slideDown {
             from {
                 opacity: 0;
@@ -270,25 +304,86 @@
     </style>
 </head>
 <body>
-    <header class="app-header">
+<header class="app-header">
         <div class="header-content">
-            <a href="list_admin.php" class="logo">
+            <a href="#" class="logo">
                 <i class="fas fa-database logo-icon"></i>
                 <span>SQL Practice</span>
             </a>
             <nav class="nav-menu">
-                <a href="ready_tasks.html" class="nav_element">Готовые задачи</a>
-                <a href="offer.html" class="nav_element">Предложения</a>
-                <a href="load_offer.html" class="nav_element">Загрузить Задачу</a>
+                <a href="load_offer.php" class="nav_element">Предложить задачу</a>
+                <a href="sandbox.php" class="nav_element">Песочница</a>
+                <a href="guid.php" class="nav_element">Справочник</a>
+                <div class="dropdown">
+                    <button class="dropdown-btn">
+                        <i class="fas fa-bars menu-icon"></i>
+                        Задачи
+                    </button>
+                    <div class="dropdown-content">
+                        <a href="list_tasks.php#easy" class="dropdown-item">Легкие</a>
+                        <a href="list_tasks.php#medium" class="dropdown-item">Средние</a>
+                        <a href="list_tasks.php#hard" class="dropdown-item">Сложные</a>
+                    </div>
                 </div>
+                <a href="login.php" class="nav_element"><?=isset($_COOKIE["login"])?$_COOKIE["login"]:'Авторизация'?></a>
             </nav>
         </div>
     </header>
 
-    
-    <div id="tasks">
+    <h2 id="easy">Легкие задачи</h2>
+    <div id="Easy-container" class="task-container"></div>
 
-    </div>
+    <h2 id="medium">Средние задачи</h2>
+    <div id="Medium-container" class="task-container"></div>
+
+    <h2 id="hard">Сложные задачи</h2>
+    <div id="hard-container" class="task-container"></div>
+
+    <script>
+        async function loadTasks(category) {
+            try {
+                const response = await fetch(`http://192.168.1.8:8000/getTasksByLevel/${category}`);
+                if (!response.ok) throw new Error('Ошибка загрузки задач');
+                const tasks = await response.json();
+                console.log(tasks)
+                const container = document.getElementById(`${category}-container`);
+                container.innerHTML = '';
+                
+                tasks.tasks.forEach(task => {
+                    const card = document.createElement('div');
+                    card.className = 'task-card';
+                    card.innerHTML = `
+                        <span class="difficulty ${task.level}">${task.level}</span>
+                        <h3>${task.id}.${task.header}</h3>
+                        <button id=${task.id} class="show-solution">
+                            Решить
+                        </button>
+                    `;
+                    container.appendChild(card);
+                });
+
+                // Добавляем обработчики для кнопок
+                container.querySelectorAll('.show-solution').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const bntId = this.id;
+                        console.log(bntId)
+                        localStorage.setItem('id', bntId);
+                        console.log(localStorage.getItem('id'))
+                        window.location.href = 'main.php';
+                    });
+                });
+            } catch (error) {
+                console.error('Ошибка:', error);
+                const container = document.getElementById(`${category}-container`);
+                container.innerHTML = `<p class="error">Ошибка загрузки задач: ${error.message}</p>`;
+            }
+        }
+
+        // Загрузка задач при старте
+        document.addEventListener('DOMContentLoaded', () => {
+            ['Easy', 'Medium', 'Hard'].forEach(loadTasks);
+        });
+    </script>
 
     <footer class="app-footer">
         <div class="footer-content">
@@ -317,59 +412,6 @@
     </footer>
 
     <script>
-
-        async function loadTasks() {
-            try {
-                const response = await fetch(`http://192.168.1.8:8000/getAllTasks`);
-                if (!response.ok) throw new Error('Ошибка загрузки задач');
-                const tasks = await response.json();
-                console.log(tasks)
-                const container = document.getElementById(`tasks`);
-                container.innerHTML = '';
-                
-                tasks.tasks.forEach(task => {
-                    const container_task = document.createElement('div');
-                    container_task.className = 'task-container';
-                    const card = document.createElement('div');
-                    card.className = 'task-card';
-                    card.innerHTML = `
-                        <span class="difficulty ${task.level}">${task.level}</span>
-                        <h3>${task.id}.${task.header}</h3>
-                        
-                        <button class="show-solution" onclick="toggleSolution('solution${task.id}')">Узнать больше</button>
-                        <div id="solution${task.id}" class="solution">
-                            <p>Информация:</p>
-                            <div class="sql-code">${task.description}</div>
-                            <button class="DownloadBtn">Скачать данные</button>
-                        </div>
-                    `;
-                    container.appendChild(card);
-                });
-
-            } catch (error) {
-                console.error('Ошибка:', error);
-                const container = document.getElementById(`${category}-container`);
-                container.innerHTML = `<p class="error">Ошибка загрузки задач: ${error.message}</p>`;
-            }
-        }
-
-        // Загрузка задач при старте
-        document.addEventListener('DOMContentLoaded', () => {
-            loadTasks();
-        });
-
-        function toggleSolution(id) {
-            const solution = document.getElementById(id);
-            const button = solution.previousElementSibling;
-            
-            if (solution.style.display === 'block') {
-                solution.style.display = 'none';
-                button.textContent = 'Узнать больше';
-            } else {
-                solution.style.display = 'block';
-                button.textContent = 'Скрыть';
-            }
-        }
         document.addEventListener('click', function(event) {
             const dropdowns = document.querySelectorAll('.dropdown');
             dropdowns.forEach(dropdown => {

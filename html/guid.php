@@ -242,8 +242,9 @@
                 <span>SQL Practice</span>
             </a>
             <nav class="nav-menu">
-                <a href="main.php" class="nav_element">Песочница</a>
-                <a href="guid.html" class="nav_element">Справочник</a>
+                <a href="load_offer.php" class="nav_element">Предложить задачу</a>
+                <a href="sandbox.php" class="nav_element">Песочница</a>
+                <a href="guid.php" class="nav_element">Справочник</a>
                 <div class="dropdown">
                     <button class="dropdown-btn">
                         <i class="fas fa-bars menu-icon"></i>
@@ -255,6 +256,7 @@
                         <a href="list_tasks.php#hard" class="dropdown-item">Сложные</a>
                     </div>
                 </div>
+                <a href="login.php" class="nav_element"><?=isset($_COOKIE["login"])?$_COOKIE["login"]:'Авторизация'?></a>
             </nav>
         </div>
     </header>
@@ -353,9 +355,30 @@ ORDER BY name DESC;</pre>
 
     </div>
 
-    <footer>
-        <p>© 2023 SQL Справочник. Все права защищены.</p>
-        <p>Контакты: support@sqlguide.com</p>
+    <footer class="app-footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>О проекте</h4>
+                <p>Практическая платформа для изучения SQL через решение реальных задач</p>
+            </div>
+            <div class="footer-section">
+                <h4>Контакты</h4>
+                <ul>
+                    <li>Email: support@sqlpractice.com</li>
+                    <li>Телефон: +7 (495) 123-45-67</li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Социальные сети</h4>
+                <div class="social-links">
+                    <a href="#" class="nav-link"><i class="fab fa-vk"></i> VK</a>
+                    <a href="#" class="nav-link"><i class="fab fa-telegram"></i> Telegram</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-copyright" style="text-align: center; margin-top: 20px;">
+            © 2023 SQL Practice. Все права защищены.
+        </div>
     </footer>
 </body>
 </html>

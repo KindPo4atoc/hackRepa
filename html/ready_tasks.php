@@ -1,4 +1,7 @@
-<!DOCTYPE html>
+<?php
+if ($_COOKIE['role'] == '1')
+{
+?><!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -11,10 +14,15 @@
             margin: 0;
             padding: 0;
         }
-        h4{
-            margin-top: 5px;
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background-color: #f5f7fa;
+            color: #2c3e50;
         }
-        h4, h2, h3 {
+        
+        h2, h3 {
             color: #2c3e50;
         }
         
@@ -45,8 +53,10 @@
             display: flex;
             flex-wrap: wrap;
             gap: 20px;
+            
            
         }
+        
         .task-card {
             background-color: white;
             border-radius: 8px;
@@ -55,7 +65,6 @@
             flex: 1 1 300px;
             transition: transform 0.3s;
             margin: 20px;
-            
             
         }
         
@@ -113,32 +122,7 @@
             background-color: #e8f4fc;
             border-radius: 5px;
         }
-        .AcceptBtn{
-            background-color: #6eff5b93;
-            color: rgb(0, 0, 0);
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: background-color 0.3s;
-        }
-        .AcceptBtn:hover {
-            background-color: #35b929;
-        }
-        .CancelBtn{
-            background-color: #ff5b5b93;
-            color: rgb(0, 0, 0);
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: background-color 0.3s;
-        }
-        .CancelBtn:hover {
-            background-color: #b92929;
-        }
+        
         .DownloadBtn{
             background-color: #3498db;
             color: white;
@@ -207,6 +191,7 @@
             top: 0;
             z-index: 1000;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            width: 100%;
         }
 
         .header-content {
@@ -224,18 +209,7 @@
             text-decoration: none;
             gap: 10px;
         }
-        input{
-            width: 150px;
-            height: 25px;
-            padding: 0.2rem;
-            border: 2px solid #b4b4b4;
-            border-radius: 10px;
-            font-size: 15px;
-            box-sizing: border-box;
-            transition: all 0.3s ease;
-            background: rgba(255, 255, 255, 0.8);
-            margin-top: 20px ;
-        }
+
         .logo-icon {
             font-size: 1.5rem;
             color: #3498db;
@@ -285,7 +259,6 @@
             flex: 1;
             min-width: 250px;
         }
-      
         @keyframes slideDown {
             from {
                 opacity: 0;
@@ -307,18 +280,17 @@
                 <span>SQL Practice</span>
             </a>
             <nav class="nav-menu">
-                <a href="ready_tasks.html" class="nav_element">Готовые задачи</a>
-                <a href="offer.html" class="nav_element">Предложения</a>
-                <a href="load_offer.html" class="nav_element">Загрузить Задачу</a>
+                <a href="ready_tasks.php" class="nav_element">Готовые задачи</a>
+                <a href="offer.php" class="nav_element">Предложения</a>
                 </div>
             </nav>
         </div>
     </header>
 
+    
     <div id="tasks">
-        
+
     </div>
-   
 
     <footer class="app-footer">
         <div class="footer-content">
@@ -350,7 +322,7 @@
 
         async function loadTasks() {
             try {
-                const response = await fetch(`http://192.168.1.8:8000/getTasksToCheck`);
+                const response = await fetch(`http://192.168.1.8:8000/getAllTasks`);
                 if (!response.ok) throw new Error('Ошибка загрузки задач');
                 const tasks = await response.json();
                 console.log(tasks)
@@ -363,17 +335,14 @@
                     const card = document.createElement('div');
                     card.className = 'task-card';
                     card.innerHTML = `
-                        <h4>От пользователя: ${task.author}</h4>
-                        <h3>${task.header}</h3>
+                        <span class="difficulty ${task.level}">${task.level}</span>
+                        <h3>${task.id}.${task.header}</h3>
                         
-                        <button class="show-solution" onclick="toggleSolution('solution4')">Узнать больше</button>
-                        <div id="solution4" class="solution">
+                        <button class="show-solution" onclick="toggleSolution('solution${task.id}')">Узнать больше</button>
+                        <div id="solution${task.id}" class="solution">
                             <p>Информация:</p>
                             <div class="sql-code">${task.description}</div>
                             <button class="DownloadBtn">Скачать данные</button>
-                            <button class="AcceptBtn">✔️ Принять</button>
-                            <button class="CancelBtn">❌ Отклонить</button>
-                            <input placeholder="Введите сложность" type="text">
                         </div>
                     `;
                     container.appendChild(card);
@@ -414,3 +383,10 @@
     </script>
 </body>
 </html>
+<?php
+}
+else
+{
+    header('Location: list_tasks.php');
+}
+?>

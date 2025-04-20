@@ -30,6 +30,17 @@
             </div>
             
             <div class="form-group">
+                <label for="username">Почта</label>
+                <div class="input-with-icon">
+                    <i class="fas fa-mail-bulk"></i>
+                    <input placeholder="Введите почту" type="email" id="email" name="email" value="" required>
+                </div>
+                <?php if (!empty($errors['username'])): ?>
+                    <span class="field-error"><?php echo htmlspecialchars($errors['username']); ?></span>
+                <?php endif; ?>
+            </div>
+
+            <div class="form-group">
                 <label for="password">Пароль</label>
                 <div class="input-with-icon">
                     <i class="fas fa-lock"></i>
@@ -66,7 +77,8 @@
             {
                 const formData = {
                     login: document.getElementById('username').value,
-                    pass_hash: document.getElementById('password').value
+                    pass_hash: document.getElementById('password').value,
+                    email : document.getElementById('email').value
                 };
                 console.log(formData);
                 fetch('http://192.168.1.8:8000/addUser', {
