@@ -1,5 +1,5 @@
 <?php
-   if ($_COOKIE['role'] == '1')
+   if (isset($_COOKIE['login']))
    {
 ?>
 <!DOCTYPE html>

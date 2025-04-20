@@ -236,7 +236,8 @@ if (isset($_COOKIE['login']))
                 })
                 .then(response => response.json())
                 .then(data => {
-                    infoTables = data.tables;  
+                    infoTables = data.tables; 
+                    createSChema();
                 })
                 .catch(error => {
                     showError('Request failed: ' + error.message);
@@ -375,7 +376,7 @@ if (isset($_COOKIE['login']))
         
 
         // Database Schema functionality with improved drag-and-drop
-        document.addEventListener('DOMContentLoaded', function() {
+        function createSChema() {
             const container = document.getElementById('schema-container');
             let tables = {};
             let relationships = [];
@@ -399,7 +400,8 @@ if (isset($_COOKIE['login']))
                 });
             
             function createTableCards() {
-                const tableCount = Object.keys(tables).length;
+                console.log(tables);
+                const tableCount = tables.length;
                 if (tableCount === 0) return;
                 
                 const minSpacing = 180;
@@ -435,7 +437,7 @@ if (isset($_COOKIE['login']))
                             <div class="column-row">
                                 <div class="column-name">${table['1'].columns[i]}${badges}</div>
                         `;
-                        if (table['1'].types[i][0]!=='PK' && table['1'].types[i][0]!=='FK') tableHTML += `<div class="column-type">${table['1'].types[i][0]}</div>`;
+                        if (table['1'].types[i][0]!=='PK' && table['1'].types[i][0]!=='FK') tableHTML += `<div class="column-type">${table['1'].types[i][0]}</div></div>`;
                         else
                         tableHTML += `
                                 <div class="column-type">${table['1'].types[i][1]}</div>
@@ -617,7 +619,7 @@ if (isset($_COOKIE['login']))
                 document.addEventListener('mouseup', stopDrag);
                 document.addEventListener('touchend', stopDrag);
             }
-        });
+        };
     </script>
 </body>
 </html>

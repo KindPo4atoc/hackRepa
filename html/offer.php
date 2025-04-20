@@ -307,6 +307,58 @@
                 transform: translateY(0);
             }
         }
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-btn {
+            background-color: #3498db;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.3s;
+        }
+
+        .dropdown-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: #f9f9f9;
+            min-width: 100px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            border-radius: 5px;
+            overflow: hidden;
+            z-index: 1000;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .dropdown-item {
+            color: #333;
+            background-color:rgb(119, 171, 206);
+            padding: 15px 53px;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.2s;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f1f1f1;
+        }
 
     </style>
 </head>
@@ -320,8 +372,16 @@
             <nav class="nav-menu">
                 <a href="ready_tasks.php" class="nav_element">Готовые задачи</a>
                 <a href="offer.php" class="nav_element">Предложения</a>
-                <a href="load_offer.php" class="nav_element">Загрузить Задачу</a>
+                <div class="dropdown">
+                    <button class="dropdown-btn">
+                        <i class="fas fa-bars menu-icon"></i>
+                        <a href="login.php" class="nav_element"><?=isset($_COOKIE["login"])?$_COOKIE["login"]:'Авторизация'?></a>
+                    </button>
+                    <div class="dropdown-content">
+                        <button class="dropdown-item" id="stoped">Выйти</button>
+                    </div>
                 </div>
+                
             </nav>
         </div>
     </header>
@@ -384,7 +444,7 @@
                             <button class="DownloadBtn">Скачать данные</button>
                             <button class="AcceptBtn" id="${task.id}">✔️ Принять</button>
                             <button class="CancelBtn" id="${task.id}">❌ Отклонить</button>
-                            <input placeholder="Введите сложность" id="level" type="text">
+                            <input placeholder="Введите сложность" id="level${task.id}" type="text">
                         </div>
                     `;
                     container.appendChild(card);
@@ -406,7 +466,7 @@
                     container.querySelectorAll('.AcceptBtn').forEach(btn => {
                     btn.addEventListener('click', async function() {
                         const bntId = this.id;
-                        const textBox = document.getElementById('level').value;
+                        const textBox = document.getElementById('level'+bntId).value;
                         const response = await fetch(`http://192.168.1.8:8000/changeStatus/${bntId}/${1}/${textBox}`);
                         if (!response.ok) throw new Error('Ошибка загрузки задач');
                         const tasks = await response.json();
@@ -425,7 +485,17 @@
                 container.innerHTML = `<p class="error">Ошибка загрузки задач: ${error.message}</p>`;
             }
         }
+        
+        function deleteCookie(name) {
+            document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+        }
 
+        let btnStop = document.getElementById('stoped');
+        btnStop.addEventListener('click', function(){
+            console.log("djnv")
+            deleteCookie('login');
+            deleteCookie('role');
+        });
 
 
         // Загрузка задач при старте

@@ -88,17 +88,17 @@
             margin-bottom: 10px;
         }
         
-        .easy {
+        .Easy {
             background-color: #d4edda;
             color: #155724;
         }
         
-        .medium {
+        .Medium {
             background-color: #fff3cd;
             color: #856404;
         }
         
-        .hard {
+        .Hard {
             background-color: #f8d7da;
             color: #721c24;
         }

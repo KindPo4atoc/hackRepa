@@ -337,11 +337,12 @@
     <div id="Medium-container" class="task-container"></div>
 
     <h2 id="hard">Сложные задачи</h2>
-    <div id="hard-container" class="task-container"></div>
+    <div id="Hard-container" class="task-container"></div>
 
     <script>
         async function loadTasks(category) {
             try {
+                console.log(category);  
                 const response = await fetch(`http://192.168.1.8:8000/getTasksByLevel/${category}`);
                 if (!response.ok) throw new Error('Ошибка загрузки задач');
                 const tasks = await response.json();
